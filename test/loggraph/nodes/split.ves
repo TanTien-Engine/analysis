@@ -1,0 +1,15 @@
+var node0 = ::loggraph::nodes::file::File()
+node0.query_param("filepath").value = "../assets/log00.txt"
+
+_editor.add_node(node0, -177, 157)
+
+var node1 = ::loggraph::nodes::print::Print()
+
+_editor.add_node(node1, 129, 147)
+
+var node2 = ::loggraph::nodes::split::Split()
+
+_editor.add_node(node2, -32, 149)
+
+Blueprint.connect(node0, "str", node2, "str")
+Blueprint.connect(node2, "items", node1, "value")

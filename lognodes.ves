@@ -1,0 +1,5 @@
+import "loggraph.nodes.*"
+
+var LOG_NODES = [ 
+File, Split, Sort, RmDup, Print,
+]

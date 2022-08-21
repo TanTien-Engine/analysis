@@ -1,0 +1,43 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.blueprint" for Blueprint
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
+import "loggraph" for LogGraph
+
+class Sort is Node
+{
+	init() 
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "items", VAR_TYPE_ARRAY)
+		]
+		this.exports = [
+			Pin(this, "items", VAR_TYPE_ARRAY)
+		]
+
+		this.layout()
+	}
+
+	calc_value(idx)
+	{
+		var v_items = Blueprint.calc_input_value(this, 0)
+		if (!v_items) {
+			return nil
+		}
+
+		var strs = []
+		for (var i in v_items.value) {
+			strs.add(i.value)
+		}
+		strs = LogGraph.sort(strs)
+
+		var items = []
+		for (var s in strs) {
+			items.add(Variant(s))
+		}
+
+		return Variant(items)
+	}
+}

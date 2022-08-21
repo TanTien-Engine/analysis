@@ -1,0 +1,21 @@
+import "editor.editor" for Editor
+
+class Logeditor is Editor
+{
+	load()
+	{
+		super.load()
+
+		this.prepare_nodes()
+	}
+
+	prepare_nodes()
+	{
+		this.clear_popup_nodes()
+
+		import "lognodes" for LOG_NODES
+		for (var node in LOG_NODES) {
+			super.add_popup_node(node)
+		}
+	}
+}

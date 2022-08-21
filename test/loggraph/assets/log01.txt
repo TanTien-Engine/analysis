@@ -1,0 +1,9 @@
+str
+efgh
+code
+5678
+string01
+log
+abcd
+1234
+string00

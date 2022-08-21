@@ -1,0 +1,29 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.blueprint" for Blueprint
+import "blueprint.variant" for VAR_TYPE_ANY
+import "logger.logger" for Logger
+
+class Print is Node
+{
+	init() 
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "value", VAR_TYPE_ANY)
+		]
+
+		this.layout()
+	}
+
+	on_pin_dirty(pin)
+	{
+		var v_value = Blueprint.calc_input_value(this, 0)
+		if (!v_value) {
+			return nil
+		}
+
+		Logger.info("Print: %(v_value.value)")
+	}
+}
