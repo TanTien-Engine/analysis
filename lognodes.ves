@@ -1,5 +1,6 @@
 import "loggraph.nodes.*"
 
 var LOG_NODES = [ 
-File, Split, Sort, RmDup, Parse, Print,
+File, Split, Sort, RmDup, Parse, 
+Print, Histogram,
 ]

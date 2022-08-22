@@ -1,0 +1,50 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.blueprint" for Blueprint
+import "blueprint.variant" for VAR_TYPE_ARRAY
+import "blueprint.node_style" for TB_TITLE, COL_PANEL_BG
+import "graphics" for Painter, Graphics
+
+class Histogram is Node
+{
+	init() 
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "nodes", VAR_TYPE_ARRAY)
+		]
+
+		this.layout()
+	}
+
+	draw(mt, cam_mt)
+	{
+		super.draw(mt, cam_mt)
+
+		var v_nodes = Blueprint.calc_input_value(this, 0)
+		if (!v_nodes) {
+			return nil
+		}
+
+		var pt = Painter.init()
+
+		var dx = 100
+		for (var i in 0 .. v_nodes.value.count)
+		{
+			var node = v_nodes.value[i].value
+
+			var x = dx * i
+			var y = 0
+
+			var w = 50
+			var h = node.get_items().count
+
+			pt.add_rect_filled(nil, [x - w * 0.5, y + 20, w, h], COL_PANEL_BG)
+
+			Graphics.draw_text(node.get_name(), x, y, 0.7, TB_TITLE)
+		}
+
+		Graphics.draw_painter(pt)
+	}
+}
