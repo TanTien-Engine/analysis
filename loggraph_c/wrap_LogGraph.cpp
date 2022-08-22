@@ -59,6 +59,23 @@ void w_Node_get_items()
     tt::return_list(node->items);
 }
 
+void w_Node_has_item()
+{
+    auto node = ((tt::Proxy<loggraph::Node>*)ves_toforeign(0))->obj;
+
+    auto item = (int)ves_tonumber(1);
+
+    bool find = false;
+    for (auto& i : node->items) {
+        if (i == item) {
+            find = true;
+            break;
+        }
+    }
+
+    ves_set_boolean(0, find);
+}
+
 std::vector<const char*> list_to_strings(int index)
 {
     std::vector<const char*> ret;
@@ -185,6 +202,7 @@ VesselForeignMethodFn LogGraphBindMethod(const char* signature)
     if (strcmp(signature, "Node.get_name()") == 0) return w_Node_get_name;
     if (strcmp(signature, "Node.get_children()") == 0) return w_Node_get_children;
     if (strcmp(signature, "Node.get_items()") == 0) return w_Node_get_items;
+    if (strcmp(signature, "Node.has_item(_)") == 0) return w_Node_has_item;
 
     if (strcmp(signature, "static LogGraph.split(_)") == 0) return w_LogGraph_split;
     if (strcmp(signature, "static LogGraph.sort(_)") == 0) return w_LogGraph_sort;

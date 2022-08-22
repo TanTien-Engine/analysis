@@ -1,0 +1,50 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.blueprint" for Blueprint
+import "blueprint.variant" for VAR_TYPE_ARRAY
+import "blueprint.node_param" for NodeParam
+import "blueprint.node_helper" for NodeHelper
+import "logger.logger" for Logger
+
+class Find is Node
+{
+	init() 
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "nodes", VAR_TYPE_ARRAY)
+		]
+
+		this.params.add(NodeParam("key", 0,  { "integer" : true }))
+
+		this.layout()
+	}
+
+	on_pin_dirty(pin)
+	{
+		super.on_pin_dirty(pin)
+
+		this.print_find_result()
+	}
+
+	print_find_result()
+	{
+		var v_nodes = Blueprint.calc_input_value(this, 0)
+		if (!v_nodes) {
+			return nil
+		}
+
+		var key = NodeHelper.calc_prop_value(this, "key")
+
+		Logger.info("Finding: %(key)")
+
+		for (var i in 0 .. v_nodes.value.count)
+		{
+			var node = v_nodes.value[i].value
+			if (node.has_item(key)) {
+				Logger.info("%(node.get_name())")
+			}
+		}
+	}
+}

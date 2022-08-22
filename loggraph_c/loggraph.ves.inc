@@ -9,6 +9,8 @@ foreign class Node
 	foreign get_children()
 	foreign get_items()
 
+	foreign has_item(item)
+
 	toString() 
 	{
 		var name  = this.get_name()
