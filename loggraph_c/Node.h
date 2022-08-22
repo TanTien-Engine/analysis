@@ -1,0 +1,20 @@
+#pragma once
+
+#include <vector>
+#include <memory>
+
+namespace loggraph
+{
+
+class Node
+{
+public:
+	std::string name;
+
+	std::vector<std::shared_ptr<Node>> children;
+
+	std::vector<int> items;
+
+}; // Node
+
+}
