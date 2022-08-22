@@ -19,11 +19,16 @@ class Print is Node
 
 	on_pin_dirty(pin)
 	{
-		var v_value = Blueprint.calc_input_value(this, 0)
-		if (!v_value) {
-			return nil
-		}
+		super.on_pin_dirty(pin)
 
-		Logger.info("Print: %(v_value.value)")
+		this.print_input_value()
+	}
+
+	print_input_value()
+	{
+		var v_value = Blueprint.calc_input_value(this, 0)
+		if (v_value) {
+			Logger.info("Print: %(v_value.value)")		
+		}
 	}
 }
