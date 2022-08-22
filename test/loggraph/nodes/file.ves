@@ -1,5 +1,5 @@
 var node0 = ::loggraph::nodes::file::File()
-node0.query_param("filepath").value = "../assets/log00.txt"
+node0.query_param("filepath").value = "../assets/num.txt"
 
 _editor.add_node(node0, -177, 157)
 
