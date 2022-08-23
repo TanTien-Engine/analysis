@@ -50,16 +50,13 @@ public:
 private:
 	void ParseNode();
 
-	void BeginNode(size_t line);
-	void EndNode(size_t start_line, size_t line_count);
-
 	virtual std::map<LogToken::Type, std::string> TokenNames() const override;
 
 private:
 	LogTokenizer m_tokenizer;
 
 	std::vector<std::shared_ptr<Node>> m_nodes;
-	std::shared_ptr<Node> m_curr = nullptr;
+	std::vector<std::shared_ptr<Node>> m_curr_nodes;
 
 	typedef LogTokenizer::Token Token;
 

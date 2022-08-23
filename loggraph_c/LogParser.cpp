@@ -124,7 +124,7 @@ void LogParser::Parse()
 
 void LogParser::ParseNode()
 {
-	Token token = m_tokenizer.NextToken();
+	Token token = m_tokenizer.PeekToken();
 	if (token.GetType() == LogToken::Eof) {
 		return;
 	}
@@ -135,20 +135,40 @@ void LogParser::ParseNode()
 		switch (token.GetType())
 		{
 		case LogToken::Begin:
-            BeginNode(start_line);
+        {
+            m_tokenizer.NextToken();
+
+            auto node = std::make_shared<Node>();
 
             token = m_tokenizer.NextToken();
             Expect(LogToken::String, token);
-            m_curr->name = token.Data();
+            node->name = token.Data();
 
+            m_curr_nodes.push_back(node);
+        }
 			break;
 		case LogToken::End:
-			m_tokenizer.NextToken();
-			EndNode(start_line, token.Line() - start_line);
-			return;
+        {
+            m_tokenizer.NextToken();
+
+            assert(!m_curr_nodes.empty());
+            auto node = m_curr_nodes.back();
+            m_curr_nodes.pop_back();
+
+            if (m_curr_nodes.empty()) {
+                m_nodes.push_back(node);
+                return;
+            } else {
+                m_curr_nodes.back()->children.push_back(node);
+            }
+        }
+			break;
         case LogToken::Integer:
-            m_curr->items.push_back(token.ToInteger<int>());
+        {
+            assert(!m_curr_nodes.empty());
+            m_curr_nodes.back()->items.push_back(token.ToInteger<int>());
             token = m_tokenizer.NextToken();
+        }
             break;
 		default:
 			Expect(LogToken::Comment | LogToken::String, token);
@@ -156,17 +176,7 @@ void LogParser::ParseNode()
 
 		token = m_tokenizer.PeekToken();
 	}
-}
-
-void LogParser::BeginNode(size_t line)
-{
-    m_curr = std::make_shared<Node>();
-    m_nodes.push_back(m_curr);
-}
-
-void LogParser::EndNode(size_t start_line, size_t line_count)
-{
-    m_curr = nullptr;
+    assert(m_curr_nodes.empty());
 }
 
 std::map<LogToken::Type, std::string> 

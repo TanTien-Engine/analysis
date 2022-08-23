@@ -1,0 +1,15 @@
+var node0 = ::loggraph::nodes::file::File()
+node0.query_param("filepath").value = "../assets/item_nest.txt"
+
+_editor.add_node(node0, -177, 157)
+
+var node1 = ::loggraph::nodes::parse::Parse()
+
+_editor.add_node(node1, -27, 156.58829190753)
+
+var node2 = ::loggraph::nodes::histogram::Histogram()
+
+_editor.add_node(node2, 126.03262941553, 156.67274341668)
+
+Blueprint.connect(node0, "str", node1, "str")
+Blueprint.connect(node1, "nodes", node2, "nodes")
