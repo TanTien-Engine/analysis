@@ -1,0 +1,21 @@
+import "editor.editor" for Editor
+
+class Codeeditor is Editor
+{
+	load()
+	{
+		super.load()
+
+		this.prepare_nodes()
+	}
+
+	prepare_nodes()
+	{
+		this.clear_popup_nodes()
+
+		import "codenodes" for CODE_NODES
+		for (var node in CODE_NODES) {
+			super.add_popup_node(node)
+		}
+	}
+}

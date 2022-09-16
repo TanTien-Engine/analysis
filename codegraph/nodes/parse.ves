@@ -1,0 +1,34 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.blueprint" for Blueprint
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY, VAR_TYPE_STRING
+import "codegraph" for CodeGraph
+
+class Parse is Node
+{
+	init() 
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "str", VAR_TYPE_STRING)
+		]
+		this.exports = [
+			Pin(this, "nodes", VAR_TYPE_ARRAY)
+		]
+
+		this.layout()
+	}
+
+	calc_value(idx)
+	{
+		var v_str = Blueprint.calc_input_value(this, 0)
+		if (!v_str) {
+			return nil
+		}
+
+		CodeGraph.parse(v_str.value)
+
+		return nil
+	}
+}

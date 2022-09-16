@@ -1,0 +1,74 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant, VAR_TYPE_STRING
+import "blueprint.node_param" for NodeParam
+import "blueprint.blueprint" for Blueprint
+import "io" for IO
+import "filesystem" for Filesystem
+
+class File is Node
+{
+	init()
+	{
+		super.init()
+
+		this.exports = [
+			Pin(this, "str", VAR_TYPE_STRING),
+		]
+
+		this.params.add(NodeParam("filepath", ""))
+
+		this.layout()
+
+		this.filepath = nil
+		this.last_write_time = 0
+	}
+
+	render_run() 
+	{
+		if (!this.filepath) {
+			return
+		}
+
+		var time = Filesystem.get_file_last_write_time(this.filepath)
+		if (time != this.last_write_time) 
+		{
+			this.load_from_file()
+			Blueprint.send_pin_dirty_root(this.exports[0])
+		}
+	}
+
+	calc_value(idx)
+	{
+		return this.load_from_file()
+	}
+
+	load_from_file()
+	{
+		var filepath = this.query_param("filepath").value
+		if (filepath == "") {
+			return nil
+		}
+
+		var absolute = Filesystem.get_absolute_path(filepath)
+
+		var old_dir = Filesystem.get_asset_base_dir()
+		Filesystem.set_asset_base_dir(Filesystem.get_file_dir(absolute))
+
+		var file = IO.open(absolute, "r")
+		if (!file.is_valid()) {
+			return nil
+		}
+
+		var str = file.read()
+
+		if (old_dir != "") {
+			Filesystem.set_asset_base_dir(old_dir)
+		}
+
+		this.filepath = absolute
+		this.last_write_time = Filesystem.get_file_last_write_time(this.filepath)
+
+		return Variant(str)		
+	}
+}
