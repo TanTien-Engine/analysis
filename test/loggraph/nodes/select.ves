@@ -15,12 +15,12 @@ var node3 = ::loggraph::nodes::select::Select()
 
 _editor.add_node(node3, 119, 137)
 
-var node4 = ::blueprint::nodes::string::String()
+var node4 = ::loggraph::nodes::string::String()
 node4.query_param("str").value = "mac_fail"
 
 _editor.add_node(node4, -32, 93.5)
 
-var node5 = ::blueprint::nodes::string::String()
+var node5 = ::loggraph::nodes::string::String()
 node5.query_param("str").value = "test002"
 
 _editor.add_node(node5, -31, 43.5)
@@ -29,4 +29,4 @@ Blueprint.connect(node0, "str", node1, "str")
 Blueprint.connect(node1, "nodes", node3, "nodes")
 Blueprint.connect(node4, "str", node3, "needs")
 Blueprint.connect(node5, "str", node3, "excepts")
-Blueprint.connect(node3, "nodes", node2, "nodes")
+Blueprint.connect(node3, "nodes", node2, "items")
