@@ -1,0 +1,20 @@
+var node0 = ::loggraph::nodes::file::File()
+node0.query_param("filepath").value = "../assets/traceback.txt"
+
+_editor.add_node(node0, -177, 157)
+
+var node1 = ::loggraph::nodes::parse::Parse()
+
+_editor.add_node(node1, -27, 156.58829190753)
+
+var node2 = ::loggraph::nodes::traceback::Traceback()
+
+_editor.add_node(node2, 112.05854046234, 159.48272286419)
+
+var node3 = ::loggraph::nodes::print::Print()
+
+_editor.add_node(node3, 267, 160)
+
+Blueprint.connect(node0, "str", node1, "str")
+Blueprint.connect(node1, "nodes", node2, "nodes")
+Blueprint.connect(node2, "nodes", node3, "items")

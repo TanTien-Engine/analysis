@@ -1,0 +1,50 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.blueprint" for Blueprint
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY, VAR_TYPE_STRING
+import "blueprint.variant_helper" for VariantHelper
+import "loggraph.variant" for VAR_TYPE_NODE
+import "loggraph" for LogGraph
+
+class Select is Node
+{
+	init()
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "nodes",  VAR_TYPE_ARRAY),
+			Pin(this, "needs",  VAR_TYPE_ARRAY),
+			Pin(this, "excepts", VAR_TYPE_ARRAY)			
+		]
+		this.exports = [
+			Pin(this, "nodes", VAR_TYPE_ARRAY)
+		]
+
+		this.layout()
+	}
+
+	calc_value(idx)
+	{
+		var v_nodes = Blueprint.calc_input_value(this, 0)
+		if (!v_nodes) {
+			return nil
+		}
+
+		var nodes = VariantHelper.flatten_values(v_nodes, VAR_TYPE_NODE)
+
+		var v_needs = Blueprint.calc_input_value(this, 1)
+		var needs = VariantHelper.flatten_values(v_needs, VAR_TYPE_STRING)
+
+		var v_excepts = Blueprint.calc_input_value(this, 2)		
+		var excepts = VariantHelper.flatten_values(v_excepts, VAR_TYPE_STRING)
+
+		var selected = LogGraph.select(nodes, needs, excepts)
+
+		var ret = []
+		for (var n in selected) {
+			ret.add(Variant(VAR_TYPE_NODE, n))
+		}
+		return Variant(ret)
+	}
+}

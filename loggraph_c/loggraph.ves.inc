@@ -5,7 +5,9 @@ foreign class Node
 {
 	init() {}
 
+	foreign get_type()
 	foreign get_name()
+
 	foreign get_children()
 	foreign get_items()
 
@@ -13,10 +15,17 @@ foreign class Node
 
 	toString() 
 	{
-		var name  = this.get_name()
-		var items = this.get_items()
-		return "%(name)(%(items.count))"
+		var type = this.get_type()
+		var name = this.get_name()
+		return "++ %(type), %(name)"
 	}
+}
+
+foreign class Traceback
+{
+	init() {}
+
+	foreign print()
 }
 
 foreign class LogGraph
@@ -26,6 +35,9 @@ foreign class LogGraph
 	foreign static rm_dup(items)
 
 	foreign static parse(str)
+
+	foreign static traceback(nodes, unique)
+	foreign static select(nodes, needs, excepts)
 }
 
 );

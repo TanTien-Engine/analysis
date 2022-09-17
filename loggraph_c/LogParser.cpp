@@ -142,6 +142,10 @@ void LogParser::ParseNode()
 
             token = m_tokenizer.NextToken();
             Expect(LogToken::String, token);
+            node->type = token.Data();
+
+            token = m_tokenizer.NextToken();
+            Expect(LogToken::String, token);
             node->name = token.Data();
 
             m_curr_nodes.push_back(node);
@@ -170,8 +174,18 @@ void LogParser::ParseNode()
             token = m_tokenizer.NextToken();
         }
             break;
+        case LogToken::String:
+        {
+            assert(!m_curr_nodes.empty());
+            m_curr_nodes.back()->strings.push_back(token.Data());
+            token = m_tokenizer.NextToken();
+        }
+            break;
 		default:
-			Expect(LogToken::Comment | LogToken::String, token);
+        {
+            Expect(LogToken::Comment, token);
+            token = m_tokenizer.NextToken();
+        }
 		}
 
 		token = m_tokenizer.PeekToken();

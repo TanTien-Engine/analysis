@@ -42,7 +42,6 @@ class Parse is Node
 		for (var n in nodes) {
 			this.v_nodes.add(Variant(VAR_TYPE_NODE, n))
 		}
-
-		return this.v_nodes
+		return Variant(this.v_nodes)
 	}
 }

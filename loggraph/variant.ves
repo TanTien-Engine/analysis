@@ -1,1 +1,5 @@
 var VAR_TYPE_NODE = "node"
+var VAR_TYPE_TRACEBACK = "traceback"
+
+var VAR_TYPE_KEY = "key"
+

@@ -1,8 +1,9 @@
 import "blueprint.node" for Node
 import "blueprint.pin" for Pin
 import "blueprint.blueprint" for Blueprint
-import "blueprint.variant" for VAR_TYPE_ANY
+import "blueprint.variant" for VAR_TYPE_ARRAY
 import "logger.logger" for Logger
+import "loggraph" for Node as lg_Node, Traceback
 
 class Print is Node
 {
@@ -11,7 +12,7 @@ class Print is Node
 		super.init()
 
 		this.imports = [
-			Pin(this, "value", VAR_TYPE_ANY)
+			Pin(this, "items", VAR_TYPE_ARRAY)
 		]
 
 		this.layout()
@@ -26,9 +27,20 @@ class Print is Node
 
 	print_input_value()
 	{
-		var v_value = Blueprint.calc_input_value(this, 0)
-		if (v_value) {
-			Logger.info("Print: %(v_value.value)")		
+		var v_items = Blueprint.calc_input_value(this, 0)
+		if (!v_items) {
+			return nil
+		}
+
+		for (var itr in v_items.value) 
+		{
+			var item = itr.value
+			if (item is lg_Node) {
+				var name = item.value.get_name()
+				Logger.info("++ %(name)")
+			} else if (item is Traceback) {
+				item.print()
+			}
 		}
 	}
 }

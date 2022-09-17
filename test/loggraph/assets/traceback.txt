@@ -1,0 +1,17 @@
+$begin mac mac_filepath0
+test001
+$begin traceback test
+path0.cpp (11): name::func0
+path1.cpp (12): base::func1
+path2.c (13): func2
+$end
+test002
+test003
+load part with idx_assem_obj
+mac_fail !!!!!!!
+$end
+
+$begin mac mac_filepath1
+mac_fail !!!!!!!
+test005
+$end

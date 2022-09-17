@@ -1,0 +1,44 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.blueprint" for Blueprint
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
+import "loggraph.variant" for VAR_TYPE_TRACEBACK
+import "loggraph" for LogGraph
+
+class Traceback is Node
+{
+	init() 
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "nodes", VAR_TYPE_ARRAY)
+		]
+		this.exports = [
+			Pin(this, "nodes", VAR_TYPE_ARRAY)
+		]
+
+		this.layout()
+	}
+
+	calc_value(idx)
+	{
+		var v_nodes = Blueprint.calc_input_value(this, 0)
+		if (!v_nodes) {
+			return nil
+		}
+
+		var nodes = []
+		for (var item in v_nodes.value) {
+			nodes.add(item.value)
+		}
+
+		var tracebacks = LogGraph.traceback(nodes, true)
+
+		var ret = []
+		for (var itr in tracebacks) {
+			ret.add(Variant(VAR_TYPE_TRACEBACK, itr))
+		}
+		return Variant(ret)
+	}
+}
