@@ -1,8 +1,8 @@
 import "blueprint.node" for Node
 import "blueprint.pin" for Pin
 import "blueprint.blueprint" for Blueprint
-import "blueprint.variant" for VAR_TYPE_ANY
-import "logger.logger" for Logger
+import "codegraph.variant" for VAR_TYPE_NODE
+import "codegraph" for CodeGraph
 
 class Print is Node
 {
@@ -11,7 +11,7 @@ class Print is Node
 		super.init()
 
 		this.imports = [
-			Pin(this, "value", VAR_TYPE_ANY)
+			Pin(this, "node", VAR_TYPE_NODE)
 		]
 
 		this.layout()
@@ -26,9 +26,9 @@ class Print is Node
 
 	print_input_value()
 	{
-		var v_value = Blueprint.calc_input_value(this, 0)
-		if (v_value) {
-			Logger.info("Print: %(v_value.value)")		
+		var v_node = Blueprint.calc_input_value(this, 0)
+		if (v_node) {
+			CodeGraph.print(v_node.value)
 		}
 	}
 }

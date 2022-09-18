@@ -7,9 +7,12 @@ var node1 = ::codegraph::nodes::parse::Parse()
 
 _editor.add_node(node1, -125, 167)
 
-var node2 = ::codegraph::nodes::print::Print()
+var node2 = ::codegraph::nodes::ast_viewer::AstViewer()
 
-_editor.add_node(node2, 22, 168)
+node2.set_size(400, 400)
+node2.title = "AST"
+
+_editor.add_node(node2, 168, 75)
 
 Blueprint.connect(node0, "str", node1, "str")
 Blueprint.connect(node1, "root", node2, "node")

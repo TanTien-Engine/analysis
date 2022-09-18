@@ -2,6 +2,7 @@ import "blueprint.node" for Node
 import "blueprint.pin" for Pin
 import "blueprint.blueprint" for Blueprint
 import "blueprint.variant" for Variant, VAR_TYPE_ARRAY, VAR_TYPE_STRING
+import "codegraph.variant" for VAR_TYPE_NODE
 import "codegraph" for CodeGraph
 
 class Parse is Node
@@ -14,7 +15,7 @@ class Parse is Node
 			Pin(this, "str", VAR_TYPE_STRING)
 		]
 		this.exports = [
-			Pin(this, "nodes", VAR_TYPE_ARRAY)
+			Pin(this, "root", VAR_TYPE_NODE)
 		]
 
 		this.layout()
@@ -27,8 +28,7 @@ class Parse is Node
 			return nil
 		}
 
-		CodeGraph.parse(v_str.value)
-
-		return nil
+		var node = CodeGraph.parse(v_str.value)
+		return Variant(VAR_TYPE_NODE, node)
 	}
 }

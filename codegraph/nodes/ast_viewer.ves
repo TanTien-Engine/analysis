@@ -1,0 +1,45 @@
+import "blueprint.nodes.commentary" for Commentary
+import "blueprint.pin" for Pin
+import "blueprint.blueprint" for Blueprint
+import "codegraph.variant" for VAR_TYPE_NODE
+
+import "blueprint.nodes.number" for Number
+
+class AstViewer is Commentary
+{
+	init()
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "node", VAR_TYPE_NODE)
+		]
+
+		this.layout()
+
+		this.title = "AST"
+
+		this.editor = nil
+	}
+
+	on_pin_dirty(pin)
+	{
+		var v_items = Blueprint.calc_input_value(this, 0)
+		if (!v_items) {
+			return nil
+		}
+
+		this.rebuild()
+	}
+
+	on_scene_add(editor) 
+	{
+		this.editor = editor
+	}
+
+	rebuild()
+	{
+		var node = Number()
+		this.editor.add_node(node, 168, 75)
+	}
+}

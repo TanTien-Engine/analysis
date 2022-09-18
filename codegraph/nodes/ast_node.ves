@@ -1,0 +1,20 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+
+class AstNode is Node
+{
+	init()
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "node", VAR_TYPE_NODE)
+		]
+
+		this.layout()
+
+		this.node = nil
+	}
+
+	
+}
