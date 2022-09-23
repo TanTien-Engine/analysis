@@ -36,7 +36,8 @@ foreign class LogGraph
 
 	foreign static parse(str)
 
-	foreign static traceback(nodes, unique)
+	foreign static traceback(nodes)
+	foreign static unique(nodes)
 	foreign static select(nodes, needs, excepts)
 }
 

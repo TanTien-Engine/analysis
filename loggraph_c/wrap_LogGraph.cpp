@@ -224,43 +224,51 @@ void w_LogGraph_traceback()
     tt::list_to_foreigns(1, nodes);
 
     std::vector<std::shared_ptr<loggraph::Traceback>> ret;
-
-    bool unique = ves_toboolean(2);
-    if (unique)
+    for (auto p : nodes)
     {
-        std::map<uint32_t, std::shared_ptr<loggraph::Traceback>> set;
-        for (auto p : nodes)
+        for (auto c : p->children)
         {
-            for (auto c : p->children)
-            {
-                if (c->type != "traceback") {
-                    continue;
-                }
-
-                auto tb = std::make_shared<loggraph::Traceback>(p->name, c);
-                auto key = tb->GetHash();
-                set.insert({ key, tb });
+            if (c->type != "traceback") {
+                continue;
             }
-        }
 
-        for (auto itr : set) {
-            ret.push_back(itr.second);
+            auto tb = std::make_shared<loggraph::Traceback>(p->name, c);
+            ret.push_back(tb);
         }
     }
-    else
-    {
-        for (auto p : nodes)
-        {
-            for (auto c : p->children)
-            {
-                if (c->type != "traceback") {
-                    continue;
-                }
 
-                auto tb = std::make_shared<loggraph::Traceback>(p->name, c);
-                ret.push_back(tb);
-            }
-        }
+    ves_pop(ves_argnum());
+
+    const int num = (int)(ret.size());
+    ves_newlist(num);
+    for (int i = 0; i < num; ++i)
+    {
+        ves_pushnil();
+        ves_import_class("loggraph", "Traceback");
+        auto proxy = (tt::Proxy<loggraph::Traceback>*)ves_set_newforeign(1, 2, sizeof(tt::Proxy<loggraph::Traceback>));
+        proxy->obj = ret[i];
+        ves_pop(1);
+        ves_seti(-2, i);
+        ves_pop(1);
+    }
+}
+
+void w_LogGraph_unique()
+{
+    std::vector<std::shared_ptr<loggraph::Traceback>> nodes;
+    tt::list_to_foreigns(1, nodes);
+
+    std::vector<std::shared_ptr<loggraph::Traceback>> ret;
+
+    std::map<uint32_t, std::shared_ptr<loggraph::Traceback>> set;
+    for (auto tb : nodes)
+    {
+        auto key = tb->GetHash();
+        set.insert({ key, tb });
+    }
+
+    for (auto itr : set) {
+        ret.push_back(itr.second);
     }
 
     ves_pop(ves_argnum());
@@ -349,7 +357,8 @@ VesselForeignMethodFn LogGraphBindMethod(const char* signature)
     if (strcmp(signature, "static LogGraph.rm_dup(_)") == 0) return w_LogGraph_rm_dup;
     if (strcmp(signature, "static LogGraph.parse(_)") == 0) return w_LogGraph_parse;
 
-    if (strcmp(signature, "static LogGraph.traceback(_,_)") == 0) return w_LogGraph_traceback;
+    if (strcmp(signature, "static LogGraph.traceback(_)") == 0) return w_LogGraph_traceback;
+    if (strcmp(signature, "static LogGraph.unique(_)") == 0) return w_LogGraph_unique;
     if (strcmp(signature, "static LogGraph.select(_,_,_)") == 0) return w_LogGraph_select;
 
     return nullptr;

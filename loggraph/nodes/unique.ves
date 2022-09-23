@@ -5,7 +5,7 @@ import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
 import "loggraph.variant" for VAR_TYPE_TRACEBACK
 import "loggraph" for LogGraph
 
-class Traceback is Node
+class Unique is Node
 {
 	init() 
 	{
@@ -33,7 +33,7 @@ class Traceback is Node
 			nodes.add(item.value)
 		}
 
-		var tracebacks = LogGraph.traceback(nodes)
+		var tracebacks = LogGraph.unique(nodes)
 
 		var ret = []
 		for (var itr in tracebacks) {
