@@ -1,6 +1,7 @@
 import "blueprint.nodes.commentary" for Commentary
 import "blueprint.pin" for Pin
 import "blueprint.blueprint" for Blueprint
+import "codegraph.nodes.ast_node" for AstNode
 import "codegraph.variant" for VAR_TYPE_NODE
 
 import "blueprint.nodes.number" for Number
@@ -12,7 +13,7 @@ class AstViewer is Commentary
 		super.init()
 
 		this.imports = [
-			Pin(this, "node", VAR_TYPE_NODE)
+			Pin(this, "root", VAR_TYPE_NODE)
 		]
 
 		this.layout()
@@ -39,7 +40,15 @@ class AstViewer is Commentary
 
 	rebuild()
 	{
-		var node = Number()
+		var v_root = Blueprint.calc_input_value(this, 0)
+		if (!v_root) {
+			return nil
+		}
+
+		var node = AstNode()
+		node.node = v_root.value
 		this.editor.add_node(node, 168, 75)
+
+		var children = v_root.value.get_children()
 	}
 }

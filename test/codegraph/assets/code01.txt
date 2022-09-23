@@ -1,21 +1,14 @@
-void test() {
-    // simple test
-    int i = 10;
-    switch (i) {
-    case 0: break;
-    default: break;
-    }
-    // nested
-    switch (i) {
-    case 0:
-        switch (1) {
-        case 1:
-            break;
-        default:
-            break;
-        }
-        break;
-    default:
-        break;
-    }
+int test0()
+{
+	return 0;
+}
+
+int test1()
+{
+	return 1;
+}
+
+int main()
+{
+	return test0();
 }

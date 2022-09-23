@@ -1,0 +1,31 @@
+var node0 = ::codegraph::nodes::file::File()
+node0.query_param("filepath").value = "../assets/code01.txt"
+
+_editor.add_node(node0, -355, 181)
+
+var node1 = ::codegraph::nodes::parse::Parse()
+
+_editor.add_node(node1, -214, 182)
+
+var node2 = ::codegraph::nodes::ast_node::AstNode()
+
+_editor.add_node(node2, -64, 162)
+
+var node3 = ::codegraph::nodes::root::Root()
+
+_editor.add_node(node3, 224, 183)
+
+var node4 = ::codegraph::nodes::print::Print()
+
+_editor.add_node(node4, 360, 182)
+
+var node5 = ::codegraph::nodes::rename::Rename()
+node5.query_param("name").value = "zz11"
+
+_editor.add_node(node5, 82, 183)
+
+Blueprint.connect(node0, "str", node1, "str")
+Blueprint.connect(node1, "root", node2, "node")
+Blueprint.connect(node2, "test0", node5, "node")
+Blueprint.connect(node5, "node", node3, "node")
+Blueprint.connect(node3, "node", node4, "node")

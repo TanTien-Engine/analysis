@@ -1,0 +1,39 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant
+import "blueprint.blueprint" for Blueprint
+import "blueprint.node_param" for NodeParam
+import "codegraph.variant" for VAR_TYPE_NODE
+import "codegraph" for CodeGraph
+
+class Rename is Node
+{
+	init() 
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "node", VAR_TYPE_NODE)
+		]
+		this.exports = [
+			Pin(this, "node", VAR_TYPE_NODE)
+		]
+
+		this.params.add(NodeParam("name", ""))
+
+		this.layout()
+	}
+
+	calc_value(idx)
+	{
+		var v_node = Blueprint.calc_input_value(this, 0)
+		if (!v_node) {
+			return nil
+		}
+
+		var name = this.query_param("name").value
+		v_node.value.set_name(name)
+
+		return v_node
+	}
+}

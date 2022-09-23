@@ -1,35 +1,38 @@
 #include "Node.h"
-
-#include <cslang/Declaration.h>
-#include <cslang/GenCode.h>
-
-#include <sstream>
-#include <iostream>
+#include "NodeRename.h"
+#include "NodeExpand.h"
+#include "NodePrint.h"
 
 namespace codegraph
 {
 
 Node::Node(const std::shared_ptr<cslang::Tokenizer>& tokenizer,
-	       const std::shared_ptr<cslang::Node>& node)
+	       const std::shared_ptr<cslang::Node>& node,
+	       const std::shared_ptr<cslang::Node>& root)
 	: m_tokenizer(tokenizer)
 	, m_node(node)
+	, m_root(root)
 {
 }
 
 void Node::Print() const
 {
-    auto tu_node = std::dynamic_pointer_cast<cslang::ast::TranslationUnitNode>(m_node);
-    if (tu_node) 
-    {
-        std::stringstream ss;
-        cslang::GenTranslationUnit(ss, tu_node);
-        std::cout << ss.str() << std::endl;
-    }
+	NodePrint(*this);
 }
 
-const char* Node::GetName() const
+std::string Node::GetName() const
 {
-	return "zz";
+	return NodeExpand::GetName(*this);
+}
+
+void Node::SetName(const std::string& name)
+{
+	NodeRename(*this, name);
+}
+
+std::vector<std::shared_ptr<Node>> Node::GetChildren() const
+{
+	return NodeExpand::GetChildren(*this);
 }
 
 }

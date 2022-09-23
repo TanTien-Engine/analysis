@@ -4,6 +4,12 @@ static const char* codegraphModuleSource = QUOTE(
 foreign class Node
 {
 	init() {}
+
+	foreign get_name()
+	foreign set_name(name)
+
+	foreign get_children()
+	foreign get_root()
 }
 
 foreign class CodeGraph

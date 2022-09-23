@@ -1,5 +1,8 @@
 import "blueprint.node" for Node
 import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
+import "blueprint.blueprint" for Blueprint
+import "codegraph.variant" for VAR_TYPE_NODE
 
 class AstNode is Node
 {
@@ -13,8 +16,101 @@ class AstNode is Node
 
 		this.layout()
 
-		this.node = nil
+		this.parent = nil
+		this.children = []
+
+		this.data_dirty = false
 	}
 
-	
+	on_pin_dirty(pin)
+	{
+		super.on_pin_dirty(pin)
+
+		this.data_dirty = true
+	}
+
+	calc_value(idx)
+	{
+		if (this.data_dirty) {
+			this.setup_data()
+			this.data_dirty = false
+		}
+
+		if (idx < this.children.count) {
+			return Variant(VAR_TYPE_NODE, this.children[idx])
+		} else {
+			return nil
+		}
+	}
+
+	get_title()
+	{
+		if (this.parent) {
+			return this.parent.get_name()
+		} else {
+			return "ast_node"
+		}
+	}
+
+	on_connected(pin)
+	{
+		if (pin.is_input) {
+			this.setup_data()
+		}
+	}
+
+	on_disconnected(pin)
+	{
+		if (pin.is_input) {
+			this.setup_data()
+		}
+	}
+
+	setup_data()
+	{
+		var v_parent = Blueprint.calc_input_value(this, 0)
+		if (!v_parent) {
+			return
+		}
+
+		this.parent = v_parent.value
+		this.children = this.parent.get_children()
+
+		if (this.is_exports_dirty()) 
+		{
+			this.clear_exports()
+
+			for (var i in 0..this.children.count) 
+			{
+				var child = this.children[i]
+				this.exports.add(Pin(this, "%(child.get_name())", VAR_TYPE_NODE))
+			}
+
+			this.layout()
+		}
+	}
+
+	is_exports_dirty()
+	{
+		if (this.children.count != this.exports.count) {
+			return true
+		} else {
+			for (var i in 0..this.children.count) {
+				if (this.children[i].get_name() != this.exports[i].name) {
+					return true
+				}
+			}
+		}
+		return false
+	}
+
+	clear_exports()
+	{
+		for (var p in this.exports) {
+			while (!p.conns.isEmpty) {
+				Blueprint.disconnect(p.conns.front())
+			}
+		}
+		this.exports.clear()
+	}
 }

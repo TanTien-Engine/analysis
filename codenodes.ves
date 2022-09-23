@@ -1,5 +1,6 @@
 import "codegraph.nodes.*"
 
 var CODE_NODES = [ 
-File, Parse, Print, AstViewer,
+File, Parse, Print, AstViewer, AstNode, Root,
+Rename,
 ]
