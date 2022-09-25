@@ -7,7 +7,7 @@ var node1 = ::codegraph::nodes::parse::Parse()
 
 _editor.add_node(node1, -214, 182)
 
-var node2 = ::codegraph::nodes::ast_node::AstNode()
+var node2 = ::codegraph::nodes::expand::Expand()
 
 _editor.add_node(node2, -64, 162)
 

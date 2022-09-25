@@ -1,0 +1,43 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant
+import "codegraph.variant" for VAR_TYPE_NODE
+
+class Statement is Node
+{
+	init()
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "i", VAR_TYPE_NODE)
+		]
+
+		this.layout()
+
+		this.stat_node = nil
+	}
+
+	calc_value(idx)
+	{
+		return nil
+	}
+
+	get_title()
+	{
+		if (this.stat_node) {
+			return this.stat_node.get_name()
+		} else {
+			return "var"
+		}
+	}
+
+	on_connected(pin)
+	{
+		var back = this.imports[this.imports.count - 1]
+		back.name = back.conns.front().from.node.get_title()
+
+		this.imports.add(Pin(this, "i", VAR_TYPE_NODE))
+		this.layout()
+	}
+}

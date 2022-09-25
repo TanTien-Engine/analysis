@@ -10,6 +10,8 @@ foreign class Node
 
 	foreign get_children()
 	foreign get_root()
+
+	foreign gen_func_graph()
 }
 
 foreign class CodeGraph

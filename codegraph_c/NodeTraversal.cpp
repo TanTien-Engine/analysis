@@ -9,6 +9,11 @@ namespace
 void traversal_variant(const std::shared_ptr<cslang::ast::DeclarationNode>& decl, codegraph::Visitor& v)
 {
 	v.VisitVariant(decl);
+
+	auto init_dec = std::static_pointer_cast<cslang::ast::InitDeclaratorNode>(decl->initDecs);
+	auto name = init_dec->dec->id;
+	
+	//printf("++ var %s\n", name);
 }
 
 void traversal_expression(const std::shared_ptr<cslang::ast::ExpressionNode>& expr, codegraph::Visitor& v)

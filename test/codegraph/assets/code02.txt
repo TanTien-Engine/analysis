@@ -1,0 +1,23 @@
+int main()
+{
+	int a = 1;
+	int b = 2;
+
+	int count0 = 0;
+	for (int i = 0; i < 10; ++i) {
+		count0 += a;
+	}
+
+	int count1 = 0;
+	for (int i = 0; i < 20; ++i) {
+		count1 += b;
+	}
+
+	int count2 = 0;
+	for (int i = 0; i < 30; ++i) {
+		count2 += a;	
+		count2 += b;
+	}
+
+	return count1;
+}

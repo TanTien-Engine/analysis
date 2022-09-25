@@ -4,7 +4,7 @@ import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
 import "blueprint.blueprint" for Blueprint
 import "codegraph.variant" for VAR_TYPE_NODE
 
-class AstNode is Node
+class Expand is Node
 {
 	init()
 	{
@@ -48,7 +48,7 @@ class AstNode is Node
 		if (this.parent) {
 			return this.parent.get_name()
 		} else {
-			return "ast_node"
+			return "expand"
 		}
 	}
 
@@ -72,6 +72,8 @@ class AstNode is Node
 		if (!v_parent) {
 			return
 		}
+
+		System.print("+++++++++++++++++++++")
 
 		this.parent = v_parent.value
 		this.children = this.parent.get_children()

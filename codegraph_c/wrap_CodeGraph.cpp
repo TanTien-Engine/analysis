@@ -1,5 +1,6 @@
 #include "wrap_CodeGraph.h"
 #include "Node.h"
+#include "VarAnalysis.h"
 #include "modules/script/TransHelper.h"
 
 #include <cslang/Parser.h>
@@ -72,6 +73,52 @@ void w_Node_get_root()
     ves_pop(1);
 }
 
+void w_Node_gen_func_graph()
+{
+    auto node = ((tt::Proxy<codegraph::Node>*)ves_toforeign(0))->obj;
+
+    codegraph::VarAnalysis analysis(node);
+
+    std::vector<std::shared_ptr<codegraph::Node>> variables, statements;
+    analysis.GetNodes(variables, statements);
+
+    ves_pop(ves_argnum());
+
+    ves_newlist(2);
+    {
+        int num = variables.size();
+        ves_newlist(num);
+        for (int i = 0; i < num; ++i)
+        {
+            ves_pushnil();
+            ves_import_class("codegraph", "Node");
+            auto proxy = (tt::Proxy<codegraph::Node>*)ves_set_newforeign(2, 3, sizeof(tt::Proxy<codegraph::Node>));
+            proxy->obj = variables[i];
+            ves_pop(1);
+            ves_seti(-2, i);
+            ves_pop(1);
+        }
+        ves_seti(-2, 0);
+        ves_pop(1);
+    }
+    {
+        int num = statements.size();
+        ves_newlist(num);
+        for (int i = 0; i < num; ++i)
+        {
+            ves_pushnil();
+            ves_import_class("codegraph", "Node");
+            auto proxy = (tt::Proxy<codegraph::Node>*)ves_set_newforeign(2, 3, sizeof(tt::Proxy<codegraph::Node>));
+            proxy->obj = statements[i];
+            ves_pop(1);
+            ves_seti(-2, i);
+            ves_pop(1);
+        }
+        ves_seti(-2, 1);
+        ves_pop(1);
+    }
+}
+
 void w_CodeGraph_parse()
 {
     const char* str = ves_tostring(1);
@@ -107,6 +154,7 @@ VesselForeignMethodFn CodeGraphBindMethod(const char* signature)
     if (strcmp(signature, "Node.set_name(_)") == 0) return w_Node_set_name;
     if (strcmp(signature, "Node.get_children()") == 0) return w_Node_get_children;
     if (strcmp(signature, "Node.get_root()") == 0) return w_Node_get_root;
+    if (strcmp(signature, "Node.gen_func_graph()") == 0) return w_Node_gen_func_graph;
 
     if (strcmp(signature, "static CodeGraph.parse(_)") == 0) return w_CodeGraph_parse;
     if (strcmp(signature, "static CodeGraph.print(_)") == 0) return w_CodeGraph_print;

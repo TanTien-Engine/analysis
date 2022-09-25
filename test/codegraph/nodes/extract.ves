@@ -1,0 +1,15 @@
+var node0 = ::codegraph::nodes::file::File()
+node0.query_param("filepath").value = "../assets/code02.txt"
+
+_editor.add_node(node0, -355, 181)
+
+var node1 = ::codegraph::nodes::parse::Parse()
+
+_editor.add_node(node1, -214, 182)
+
+var node2 = ::codegraph::nodes::expand::Expand()
+
+_editor.add_node(node2, -69, 181)
+
+Blueprint.connect(node0, "str", node1, "str")
+Blueprint.connect(node1, "root", node2, "node")

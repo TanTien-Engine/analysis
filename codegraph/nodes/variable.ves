@@ -1,0 +1,38 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant
+import "codegraph.variant" for VAR_TYPE_NODE
+
+class Variable is Node
+{
+	init()
+	{
+		super.init()
+
+		this.exports = [
+			Pin(this, "var", VAR_TYPE_NODE)
+		]
+
+		this.layout()
+
+		this.var_node = nil
+	}
+
+	calc_value(idx)
+	{
+		if (this.var_node) {
+			return Variant(VAR_TYPE_NODE, this.var_node)
+		} else {
+			return nil
+		}
+	}
+
+	get_title()
+	{
+		if (this.var_node) {
+			return this.var_node.get_name()
+		} else {
+			return "var"
+		}
+	}
+}

@@ -1,4 +1,5 @@
 #include "Node.h"
+#include "NodeName.h"
 #include "NodeRename.h"
 #include "NodeExpand.h"
 #include "NodePrint.h"
@@ -22,7 +23,7 @@ void Node::Print() const
 
 std::string Node::GetName() const
 {
-	return NodeExpand::GetName(*this);
+	return NodeName(*this);
 }
 
 void Node::SetName(const std::string& name)
@@ -32,7 +33,7 @@ void Node::SetName(const std::string& name)
 
 std::vector<std::shared_ptr<Node>> Node::GetChildren() const
 {
-	return NodeExpand::GetChildren(*this);
+	return NodeExpand(*this);
 }
 
 }
