@@ -26,11 +26,6 @@ class FuncViewer is Commentary
 
 	on_pin_dirty(pin)
 	{
-		var v_items = Blueprint.calc_input_value(this, 0)
-		if (!v_items) {
-			return nil
-		}
-
 		this.rebuild()
 	}
 

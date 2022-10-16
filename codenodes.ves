@@ -4,4 +4,5 @@ var CODE_NODES = [
 File, Parse, Print, Root,
 Variable,
 Expand, Rename, FuncViewer,
+BasicBlock, FlowGraph,
 ]

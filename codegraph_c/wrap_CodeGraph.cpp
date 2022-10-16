@@ -1,6 +1,8 @@
 #include "wrap_CodeGraph.h"
 #include "Node.h"
+#include "BasicBlock.h"
 #include "VarAnalysis.h"
+#include "FlowGraph.h"
 #include "modules/script/TransHelper.h"
 
 #include <cslang/Parser.h>
@@ -119,6 +121,56 @@ void w_Node_gen_func_graph()
     }
 }
 
+void w_Node_gen_flow_graph()
+{
+    auto node = ((tt::Proxy<codegraph::Node>*)ves_toforeign(0))->obj;
+
+    codegraph::FlowGraph fg(node);
+    auto& nodes = fg.GetNodes();
+
+    ves_pop(ves_argnum());
+
+    const int num = (int)(nodes.size());
+    ves_newlist(num);
+    for (int i = 0; i < num; ++i)
+    {
+        ves_pushnil();
+        ves_import_class("codegraph", "BasicBlock");
+        auto proxy = (tt::Proxy<codegraph::BasicBlock>*)ves_set_newforeign(1, 2, sizeof(tt::Proxy<codegraph::BasicBlock>));
+        proxy->obj = nodes[i];
+        ves_pop(1);
+        ves_seti(-2, i);
+        ves_pop(1);
+    }
+}
+
+void w_BasicBlock_allocate()
+{
+    auto proxy = (tt::Proxy<codegraph::BasicBlock>*)ves_set_newforeign(0, 0, sizeof(tt::Proxy<codegraph::BasicBlock>));
+    proxy->obj = std::make_shared<codegraph::BasicBlock>();
+}
+
+int w_BasicBlock_finalize(void* data)
+{
+    auto proxy = (tt::Proxy<codegraph::BasicBlock>*)(data);
+    proxy->~Proxy();
+    return sizeof(tt::Proxy<codegraph::BasicBlock>);
+}
+
+void w_BasicBlock_get_name()
+{
+    auto bb = ((tt::Proxy<codegraph::BasicBlock>*)ves_toforeign(0))->obj;
+
+    auto name = bb->GetName();
+    ves_set_lstring(0, name.c_str(), name.size());
+}
+
+void w_BasicBlock_print()
+{
+    auto bb = ((tt::Proxy<codegraph::BasicBlock>*)ves_toforeign(0))->obj;
+    bb->Print();
+}
+
 void w_CodeGraph_parse()
 {
     const char* str = ves_tostring(1);
@@ -155,6 +207,10 @@ VesselForeignMethodFn CodeGraphBindMethod(const char* signature)
     if (strcmp(signature, "Node.get_children()") == 0) return w_Node_get_children;
     if (strcmp(signature, "Node.get_root()") == 0) return w_Node_get_root;
     if (strcmp(signature, "Node.gen_func_graph()") == 0) return w_Node_gen_func_graph;
+    if (strcmp(signature, "Node.gen_flow_graph()") == 0) return w_Node_gen_flow_graph;
+
+    if (strcmp(signature, "BasicBlock.get_name()") == 0) return w_BasicBlock_get_name;
+    if (strcmp(signature, "BasicBlock.print()") == 0) return w_BasicBlock_print;
 
     if (strcmp(signature, "static CodeGraph.parse(_)") == 0) return w_CodeGraph_parse;
     if (strcmp(signature, "static CodeGraph.print(_)") == 0) return w_CodeGraph_print;
@@ -168,6 +224,13 @@ void CodeGraphBindClass(const char* class_name, VesselForeignClassMethods* metho
     {
         methods->allocate = w_Node_allocate;
         methods->finalize = w_Node_finalize;
+        return;
+    }
+
+    if (strcmp(class_name, "BasicBlock") == 0)
+    {
+        methods->allocate = w_BasicBlock_allocate;
+        methods->finalize = w_BasicBlock_finalize;
         return;
     }
 }

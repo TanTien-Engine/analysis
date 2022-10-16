@@ -1,0 +1,66 @@
+import "blueprint.pin" for Pin
+import "blueprint.blueprint" for Blueprint
+import "blueprint.nodes.subgraph" for Subgraph
+import "codegraph.variant" for VAR_TYPE_NODE
+import "codegraph.nodes.basic_block" for BasicBlock
+
+class FlowGraph is Subgraph
+{
+	init()
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "root", VAR_TYPE_NODE)
+		]
+
+		this.layout()
+
+		this.title = "CFG"
+
+		this.editor = nil
+	}
+
+	on_pin_dirty(pin)
+	{
+		this.rebuild()
+	}
+
+	on_scene_add(editor) 
+	{
+		this.editor = editor
+	}
+
+	rebuild()
+	{
+		var v_root = Blueprint.calc_input_value(this, 0)		
+		if (!v_root) {
+			return nil
+		}
+
+		var nodes = v_root.value.gen_flow_graph()
+		for (var i = 0; i < nodes.count; i = i + 1)
+		{
+			var node = BasicBlock()
+			node.bb_node = nodes[i]
+			this.add_node(node, 168, 75 + i * 50)
+		}
+	}
+
+	load_from_string(editor, str, sub_editor, module_name)
+	{
+		super.load_from_string(editor, str, sub_editor, module_name)
+
+		var v_root = Blueprint.calc_input_value(this, 0)
+		if (!v_root) {
+			return nil
+		}
+
+		var nodes = v_root.value.gen_flow_graph()
+		if (nodes.count == this.all_items.count) {
+			for (var i = 0; i < nodes.count; i = i + 1) {
+				item[0].bb_node = nodes[i]
+			}
+		}
+	}
+}

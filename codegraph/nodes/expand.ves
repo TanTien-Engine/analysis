@@ -73,8 +73,6 @@ class Expand is Node
 			return
 		}
 
-		System.print("+++++++++++++++++++++")
-
 		this.parent = v_parent.value
 		this.children = this.parent.get_children()
 

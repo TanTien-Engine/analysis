@@ -12,6 +12,16 @@ foreign class Node
 	foreign get_root()
 
 	foreign gen_func_graph()
+	foreign gen_flow_graph()
+}
+
+foreign class BasicBlock
+{
+	init() {}
+
+	foreign get_name()
+
+	foreign print()
 }
 
 foreign class CodeGraph

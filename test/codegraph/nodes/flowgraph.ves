@@ -1,0 +1,31 @@
+var node0 = ::codegraph::nodes::file::File()
+node0.query_param("filepath").value = "../assets/cfg.txt"
+
+_editor.add_node(node0, -266, 166)
+
+var node1 = ::codegraph::nodes::parse::Parse()
+
+_editor.add_node(node1, -125, 167)
+
+var node2 = ::codegraph::nodes::flow_graph::FlowGraph()
+
+node2.file_content = "
+var node0 = ::codegraph::nodes::basic_block::BasicBlock()
+
+_editor.add_node(node0, 168, 75)
+
+var node1 = ::codegraph::nodes::basic_block::BasicBlock()
+
+_editor.add_node(node1, 168, 125)
+
+var node2 = ::codegraph::nodes::basic_block::BasicBlock()
+
+_editor.add_node(node2, 168, 175)
+
+"
+node2.load_from_string(_editor, node2.file_content, _editor, "subgraph")
+
+_editor.add_node(node2, 115, 154)
+
+Blueprint.connect(node0, "str", node1, "str")
+Blueprint.connect(node1, "root", node2, "root")

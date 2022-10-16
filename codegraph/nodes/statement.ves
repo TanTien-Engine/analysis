@@ -1,6 +1,5 @@
 import "blueprint.node" for Node
 import "blueprint.pin" for Pin
-import "blueprint.variant" for Variant
 import "codegraph.variant" for VAR_TYPE_NODE
 
 class Statement is Node

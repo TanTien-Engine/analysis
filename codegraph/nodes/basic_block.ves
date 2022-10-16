@@ -1,0 +1,44 @@
+import "network.vertex" for Vertex
+import "network.vertex_shape" for SHAPE_CAPSULE_H
+import "codegraph.variant" for VAR_TYPE_NODE
+
+class BasicBlock is Vertex
+{
+	init()
+	{
+		super.init()
+
+		this.shape = SHAPE_CAPSULE_H
+
+		this.pin_types_f = [ VAR_TYPE_NODE ]
+		this.pin_types_t = [
+			[ VAR_TYPE_NODE ],
+			[ VAR_TYPE_NODE ],
+			[ VAR_TYPE_NODE ],
+			[ VAR_TYPE_NODE ]
+		]
+
+		this.bb_node = nil
+	}
+
+	calc_value(idx)
+	{
+		return nil
+	}
+
+	get_title()
+	{
+		if (this.bb_node) {
+			return this.bb_node.get_name()
+		} else {
+			return "bb"
+		}
+	}
+
+	on_mouse_clicked(x, y, btn) 
+	{
+		if (this.bb_node) {
+			this.bb_node.print()
+		}
+	}
+}
