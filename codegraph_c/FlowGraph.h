@@ -3,6 +3,9 @@
 #include <memory>
 #include <vector>
 
+namespace cslang { class Tokenizer; }
+namespace cslang::ast { struct FunctionNode; struct StatementNode; }
+
 namespace codegraph
 {
 
@@ -14,15 +17,18 @@ class FlowGraph
 public:
 	FlowGraph(const std::shared_ptr<Node>& node);
 
-	auto& GetNodes() const { return m_nodes; }
+	auto& GetFuncNodes() const { return m_func_nodes; }
 
 private:
 	void Build(const std::shared_ptr<Node>& node);
 
-private:
-	//std::shared_ptr<BasicBlock> m_entry = nullptr;
+	std::shared_ptr<BasicBlock> BuildFunc(const std::shared_ptr<cslang::Tokenizer>& tokenizer,
+		const std::shared_ptr<cslang::ast::FunctionNode>& func) const;
+	std::shared_ptr<BasicBlock> BuildStatement(const std::shared_ptr<cslang::Tokenizer>& tokenizer, 
+		const std::shared_ptr<cslang::ast::StatementNode>& stmt) const;
 
-	std::vector<std::shared_ptr<BasicBlock>> m_nodes;
+private:
+	std::vector<std::shared_ptr<BasicBlock>> m_func_nodes;
 
 }; // FlowGraph
 

@@ -38,12 +38,16 @@ class FlowGraph is Subgraph
 			return nil
 		}
 
-		var nodes = v_root.value.gen_flow_graph()
-		for (var i = 0; i < nodes.count; i = i + 1)
+		var funcs = v_root.value.gen_flow_graph()
+		for (var i = 0; i < funcs.count; i = i + 1)
 		{
-			var node = BasicBlock()
-			node.bb_node = nodes[i]
-			this.add_node(node, 168, 75 + i * 50)
+			var blocks = funcs[i]
+			for (var j = 0; j < blocks.count; j = j + 1)
+			{
+				var node = BasicBlock()
+				node.bb_node = blocks[j]
+				this.add_node(node, 168 + j * 100, 75 + i * 50)
+			}
 		}
 	}
 

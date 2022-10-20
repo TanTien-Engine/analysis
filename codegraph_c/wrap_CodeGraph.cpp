@@ -88,7 +88,7 @@ void w_Node_gen_func_graph()
 
     ves_newlist(2);
     {
-        int num = variables.size();
+        int num = static_cast<int>(variables.size());
         ves_newlist(num);
         for (int i = 0; i < num; ++i)
         {
@@ -104,7 +104,7 @@ void w_Node_gen_func_graph()
         ves_pop(1);
     }
     {
-        int num = statements.size();
+        int num = static_cast<int>(statements.size());
         ves_newlist(num);
         for (int i = 0; i < num; ++i)
         {
@@ -126,20 +126,37 @@ void w_Node_gen_flow_graph()
     auto node = ((tt::Proxy<codegraph::Node>*)ves_toforeign(0))->obj;
 
     codegraph::FlowGraph fg(node);
-    auto& nodes = fg.GetNodes();
+    auto& funcs = fg.GetFuncNodes();
 
     ves_pop(ves_argnum());
 
-    const int num = (int)(nodes.size());
-    ves_newlist(num);
-    for (int i = 0; i < num; ++i)
+    const int f_num = (int)(funcs.size());
+    ves_newlist(f_num);
+    for (int i_func = 0; i_func < f_num; ++i_func)
     {
-        ves_pushnil();
-        ves_import_class("codegraph", "BasicBlock");
-        auto proxy = (tt::Proxy<codegraph::BasicBlock>*)ves_set_newforeign(1, 2, sizeof(tt::Proxy<codegraph::BasicBlock>));
-        proxy->obj = nodes[i];
-        ves_pop(1);
-        ves_seti(-2, i);
+        auto func = funcs[i_func];
+
+        std::vector<std::shared_ptr<codegraph::BasicBlock>> blocks;
+        auto bb = func;
+        while (bb) {
+            blocks.push_back(bb);
+            bb = bb->GetNext();
+        }
+
+        ves_newlist(int(blocks.size()));
+
+        for (int i = 0, n = (int)(blocks.size()); i < n; ++i)
+        {
+            ves_pushnil();
+            ves_import_class("codegraph", "BasicBlock");
+            auto proxy = (tt::Proxy<codegraph::BasicBlock>*)ves_set_newforeign(2, 3, sizeof(tt::Proxy<codegraph::BasicBlock>));
+            proxy->obj = blocks[i];
+            ves_pop(1);
+            ves_seti(-2, i);
+            ves_pop(1);
+        }
+
+        ves_seti(-2, i_func);
         ves_pop(1);
     }
 }
