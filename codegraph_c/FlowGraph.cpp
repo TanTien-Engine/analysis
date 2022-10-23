@@ -240,6 +240,34 @@ FlowGraph::BuildStatement(const std::shared_ptr<cslang::Tokenizer>& tokenizer,
 			}
 		}
 			break;
+		case cslang::NK_ForStatement:
+		{
+			auto for_stmt = std::static_pointer_cast<cslang::ast::ForStmtNode>(stmt);
+
+			//auto header = std::make_shared<BasicBlock>(tokenizer, "for");
+			//header->AddNode(for_stmt->init_decl);
+			//header->AddNode(for_stmt->expr);
+			//header->AddNode(for_stmt->incr_expr);
+
+			auto body = BuildStatement(tokenizer, for_stmt->stmt);
+
+			//bb->AddChild(header);
+			bb->AddChild(body);
+		}
+			break;
+		case cslang::NK_WhileStatement:
+		{
+			auto loop_stmt = std::static_pointer_cast<cslang::ast::LoopStmtNode>(stmt);
+
+			//auto header = std::make_shared<BasicBlock>(tokenizer, "while");
+			//header->AddNode(loop_stmt->expr);
+
+			auto body = BuildStatement(tokenizer, loop_stmt->stmt);
+
+			//bb->AddChild(header);
+			bb->AddChild(body);
+		}
+			break;
 		}
 
 		return bb;
