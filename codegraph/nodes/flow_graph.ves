@@ -92,7 +92,7 @@ class FlowGraph is Subgraph
 				}
 			}
 
-			if (is_end) 
+			if (is_end and !node.bb_node.is_exit())
 			{
 				var pin_f = NW_Pin(node, PIN_CAPSULE_BOTTOM_IDX)
 				var pin_t = NW_Pin(next_node, PIN_CAPSULE_TOP_IDX)

@@ -20,6 +20,7 @@ public:
 	void Print() const;
 
 	void AddNode(const std::shared_ptr<cslang::Node>& node) { m_nodes.push_back(node); }
+	auto& GetNodes() const { return m_nodes; }
 
 	void AddChild(const std::shared_ptr<BasicBlock>& child) {
 		m_children.push_back(child);

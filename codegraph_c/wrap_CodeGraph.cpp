@@ -214,6 +214,18 @@ void w_BasicBlock_print()
     bb->Print();
 }
 
+void w_BasicBlock_is_exit()
+{
+    auto bb = ((tt::Proxy<codegraph::BasicBlock>*)ves_toforeign(0))->obj;
+    auto& nodes = bb->GetNodes();
+    if (nodes.empty()) {
+        ves_set_boolean(0, true);
+    } else {
+        auto stmt = std::static_pointer_cast<cslang::ast::StatementNode>(nodes.back());
+        ves_set_boolean(0, stmt->kind == cslang::NK_ReturnStatement);
+    }
+}
+
 void w_CodeGraph_parse()
 {
     const char* str = ves_tostring(1);
@@ -256,6 +268,7 @@ VesselForeignMethodFn CodeGraphBindMethod(const char* signature)
     if (strcmp(signature, "BasicBlock.get_children()") == 0) return w_BasicBlock_get_children;
     if (strcmp(signature, "BasicBlock.get_next()") == 0) return w_BasicBlock_get_next;
     if (strcmp(signature, "BasicBlock.print()") == 0) return w_BasicBlock_print;
+    if (strcmp(signature, "BasicBlock.is_exit()") == 0) return w_BasicBlock_is_exit;
 
     if (strcmp(signature, "static CodeGraph.parse(_)") == 0) return w_CodeGraph_parse;
     if (strcmp(signature, "static CodeGraph.print(_)") == 0) return w_CodeGraph_print;

@@ -25,6 +25,8 @@ foreign class BasicBlock
 	foreign get_next()
 
 	foreign print()
+
+	foreign is_exit()
 }
 
 foreign class CodeGraph
