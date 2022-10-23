@@ -20,6 +20,9 @@ foreign class BasicBlock
 	init() {}
 
 	foreign get_name()
+	foreign get_children()
+
+	foreign get_next()
 
 	foreign print()
 }

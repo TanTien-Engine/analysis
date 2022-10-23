@@ -44,6 +44,8 @@ void FlowGraph::Build(const std::shared_ptr<Node>& node)
 	auto tokenizer = node->GetTokenizer();
 	auto root = node->GetNode();
 
+	m_root = std::make_shared<BasicBlock>(tokenizer, "root");
+
 	switch (root->kind)
 	{
 	case cslang::NK_TranslationUnit:
@@ -58,7 +60,7 @@ void FlowGraph::Build(const std::shared_ptr<Node>& node)
 			{
 				auto func = std::static_pointer_cast<cslang::ast::FunctionNode>(p);
 				auto node = BuildFunc(tokenizer, func);
-				m_func_nodes.push_back(node);
+				m_root->AddChild(node);
 			}
 				break;
 			default:
@@ -71,8 +73,6 @@ void FlowGraph::Build(const std::shared_ptr<Node>& node)
 	default:
 		assert(0);
 	}
-
-	int zz = 0;
 }
 
 std::shared_ptr<BasicBlock> 
@@ -227,18 +227,18 @@ FlowGraph::BuildStatement(const std::shared_ptr<cslang::Tokenizer>& tokenizer,
 		auto bb = std::make_shared<BasicBlock>(tokenizer, get_stmt_name(stmt));
 		bb->AddNode(stmt);
 
-		//switch (stmt->kind)
-		//{
-		//case cslang::NK_IfStatement:
-		//{
-		//	auto if_stmt = std::static_pointer_cast<cslang::ast::IfStmtNode>(stmt);
-		//	auto then_bb = BuildStatement(tokenizer, if_stmt->then_stmt);
-		//	auto else_bb = BuildStatement(tokenizer, if_stmt->else_stmt);
-		//	connect_two_list(bb, then_bb);
-		//	connect_two_list(then_bb, else_bb);
-		//}
-		//	break;
-		//}
+		switch (stmt->kind)
+		{
+		case cslang::NK_IfStatement:
+		{
+			auto if_stmt = std::static_pointer_cast<cslang::ast::IfStmtNode>(stmt);
+			auto then_bb = BuildStatement(tokenizer, if_stmt->then_stmt);
+			auto else_bb = BuildStatement(tokenizer, if_stmt->else_stmt);
+			bb->AddChild(then_bb);
+			bb->AddChild(else_bb);
+		}
+			break;
+		}
 
 		return bb;
 	}

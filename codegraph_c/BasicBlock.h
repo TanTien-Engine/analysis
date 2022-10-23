@@ -21,6 +21,11 @@ public:
 
 	void AddNode(const std::shared_ptr<cslang::Node>& node) { m_nodes.push_back(node); }
 
+	void AddChild(const std::shared_ptr<BasicBlock>& child) {
+		m_children.push_back(child);
+	}
+	auto& GetChildren() const { return m_children; }
+
 	void SetPrev(const std::shared_ptr<BasicBlock>& prev) { m_prev = prev; }
 	void SetNext(const std::shared_ptr<BasicBlock>& next) { m_next = next; }
 
@@ -35,6 +40,8 @@ private:
 	std::string m_name;
 
 	std::shared_ptr<BasicBlock> m_prev = nullptr, m_next = nullptr;
+
+	std::vector<std::shared_ptr<BasicBlock>> m_children;
 
 }; // BasicBlock
 

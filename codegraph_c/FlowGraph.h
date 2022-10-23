@@ -17,7 +17,7 @@ class FlowGraph
 public:
 	FlowGraph(const std::shared_ptr<Node>& node);
 
-	auto& GetFuncNodes() const { return m_func_nodes; }
+	auto GetRoot() const { return m_root; }
 
 private:
 	void Build(const std::shared_ptr<Node>& node);
@@ -28,7 +28,7 @@ private:
 		const std::shared_ptr<cslang::ast::StatementNode>& stmt) const;
 
 private:
-	std::vector<std::shared_ptr<BasicBlock>> m_func_nodes;
+	std::shared_ptr<BasicBlock> m_root = nullptr;
 
 }; // FlowGraph
 

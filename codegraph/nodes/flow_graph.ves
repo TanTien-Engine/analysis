@@ -3,6 +3,10 @@ import "blueprint.blueprint" for Blueprint
 import "blueprint.nodes.subgraph" for Subgraph
 import "codegraph.variant" for VAR_TYPE_NODE
 import "codegraph.nodes.basic_block" for BasicBlock
+import "network.network" for Network
+import "network.vertex_shape" for PIN_CAPSULE_TOP_IDX, PIN_CAPSULE_BOTTOM_IDX, PIN_CAPSULE_RIGHT_IDX
+import "network.pin" for Pin as NW_Pin
+import "maths" for Matrix2D
 
 class FlowGraph is Subgraph
 {
@@ -31,6 +35,15 @@ class FlowGraph is Subgraph
 		this.editor = editor
 	}
 
+	add_node(node, x, y)
+	{
+		super.add_node(node, x, y)
+
+		var mat = Matrix2D.init()
+		mat.transform(x, y, 0, 1, 1, 0, 0, 0, 0)
+		node.update(mat)
+	}
+
 	rebuild()
 	{
 		var v_root = Blueprint.calc_input_value(this, 0)		
@@ -38,17 +51,145 @@ class FlowGraph is Subgraph
 			return nil
 		}
 
-		var funcs = v_root.value.gen_flow_graph()
-		for (var i = 0; i < funcs.count; i = i + 1)
+		var root = v_root.value.gen_flow_graph()
+
+		var children = root.get_children()
+		for (var i = 0; i < children.count; i = i + 1) {
+			this.build_graph(children[i], i * 400, 0)
+		}
+	}
+
+	connect_n_to_1(prev_nodes, next_node)
+	{
+		if (prev_nodes.isEmpty or !next_node) {
+			return nil
+		}
+
+		var y_min = prev_nodes[0].pos.y
+
+		var buf = []
+		for (var n in prev_nodes) {
+			buf.add(n)
+		}
+
+		while (!buf.isEmpty)
 		{
-			var blocks = funcs[i]
-			for (var j = 0; j < blocks.count; j = j + 1)
+			var node = buf[0]
+			buf.pop_front()
+
+			var is_end = true
+			var y_node = node.pos.y
+
+			var next_nodes = Network.neighbors(node, PIN_CAPSULE_BOTTOM_IDX)
+			for (var n_node in next_nodes)
 			{
-				var node = BasicBlock()
-				node.bb_node = blocks[j]
-				this.add_node(node, 168 + j * 100, 75 + i * 50)
+				var y_next = n_node.pos.y
+				if (y_next < y_node) 
+				{
+					buf.add(n_node)
+					is_end = false
+					y_min = y_next
+				}
+			}
+
+			if (is_end) 
+			{
+				var pin_f = NW_Pin(node, PIN_CAPSULE_BOTTOM_IDX)
+				var pin_t = NW_Pin(next_node, PIN_CAPSULE_TOP_IDX)
+				Network.connect(pin_f, pin_t)
 			}
 		}
+
+		return y_min
+	}
+
+	build_graph(entry, x, y)
+	{
+		var dy = 100
+
+		var first_node = nil
+		var last_node = nil
+
+		var prev_node = nil
+
+		var curr = entry
+		while (curr)
+		{
+			var next_node = BasicBlock()
+			next_node.bb_node = curr
+
+			if (!first_node) {
+				first_node = next_node
+			}
+			last_node = next_node
+
+			if (prev_node)
+			{
+				var prev_children = prev_node.bb_node.get_children()
+				if (prev_children.isEmpty)
+				{
+					this.add_node(next_node, x, y)
+
+					var pin_f = NW_Pin(prev_node, PIN_CAPSULE_BOTTOM_IDX)
+					var pin_t = NW_Pin(next_node, PIN_CAPSULE_TOP_IDX)
+					Network.connect(pin_f, pin_t)
+				}
+				else
+				{
+					var end_nodes = this.build_subgraph(prev_node, prev_children, x, y)
+
+					var y_min = this.connect_n_to_1(end_nodes, next_node)
+					y = y_min - dy
+					this.add_node(next_node, x, y)
+
+				}
+			}
+			else
+			{
+				this.add_node(next_node, x, y)
+			}
+			y = y - dy
+
+			prev_node = next_node
+
+			curr = curr.get_next()
+		}
+
+		if (prev_node)
+		{
+			var prev_children = prev_node.bb_node.get_children()
+			if (!prev_children.isEmpty) {
+				this.build_subgraph(prev_node, prev_children, x, y)
+			}
+		}
+
+		return [first_node, last_node]
+	}
+
+	build_subgraph(prev, children, x, y)
+	{
+		var dx = 200
+		x = x - (children.count - 1) * 0.5 * dx
+
+		var end_nodes = []
+
+		for (var i = 0; i < children.count; i = i + 1)
+		{
+			var child = children[i]
+
+			var pair = this.build_graph(child, x, y)
+
+			var next = pair[0]
+			var pin_f = NW_Pin(prev, PIN_CAPSULE_BOTTOM_IDX)
+			var pin_t = NW_Pin(next, PIN_CAPSULE_TOP_IDX)
+			Network.connect(pin_f, pin_t)
+
+			end_nodes.add(pair[1])
+
+			x = x + dx
+		}
+
+		return end_nodes
 	}
 
 	load_from_string(editor, str, sub_editor, module_name)

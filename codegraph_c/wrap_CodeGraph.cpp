@@ -126,38 +126,21 @@ void w_Node_gen_flow_graph()
     auto node = ((tt::Proxy<codegraph::Node>*)ves_toforeign(0))->obj;
 
     codegraph::FlowGraph fg(node);
-    auto& funcs = fg.GetFuncNodes();
 
     ves_pop(ves_argnum());
 
-    const int f_num = (int)(funcs.size());
-    ves_newlist(f_num);
-    for (int i_func = 0; i_func < f_num; ++i_func)
+    auto root = fg.GetRoot();
+    if (root)
     {
-        auto func = funcs[i_func];
-
-        std::vector<std::shared_ptr<codegraph::BasicBlock>> blocks;
-        auto bb = func;
-        while (bb) {
-            blocks.push_back(bb);
-            bb = bb->GetNext();
-        }
-
-        ves_newlist(int(blocks.size()));
-
-        for (int i = 0, n = (int)(blocks.size()); i < n; ++i)
-        {
-            ves_pushnil();
-            ves_import_class("codegraph", "BasicBlock");
-            auto proxy = (tt::Proxy<codegraph::BasicBlock>*)ves_set_newforeign(2, 3, sizeof(tt::Proxy<codegraph::BasicBlock>));
-            proxy->obj = blocks[i];
-            ves_pop(1);
-            ves_seti(-2, i);
-            ves_pop(1);
-        }
-
-        ves_seti(-2, i_func);
+        ves_pushnil();
+        ves_import_class("codegraph", "BasicBlock");
+        auto proxy = (tt::Proxy<codegraph::BasicBlock>*)ves_set_newforeign(0, 1, sizeof(tt::Proxy<codegraph::BasicBlock>));
+        proxy->obj = root;
         ves_pop(1);
+    }
+    else
+    {
+        ves_pushnil();
     }
 }
 
@@ -180,6 +163,49 @@ void w_BasicBlock_get_name()
 
     auto name = bb->GetName();
     ves_set_lstring(0, name.c_str(), name.size());
+}
+
+void w_BasicBlock_get_children()
+{
+    auto bb = ((tt::Proxy<codegraph::BasicBlock>*)ves_toforeign(0))->obj;
+
+    auto& children = bb->GetChildren();
+
+    ves_pop(ves_argnum());
+
+    const int num = (int)(children.size());
+    ves_newlist(num);
+    for (int i = 0; i < num; ++i)
+    {
+        ves_pushnil();
+        ves_import_class("codegraph", "BasicBlock");
+        auto proxy = (tt::Proxy<codegraph::BasicBlock>*)ves_set_newforeign(1, 2, sizeof(tt::Proxy<codegraph::BasicBlock>));
+        proxy->obj = children[i];
+        ves_pop(1);
+        ves_seti(-2, i);
+        ves_pop(1);
+    }
+}
+
+void w_BasicBlock_get_next()
+{
+    auto bb = ((tt::Proxy<codegraph::BasicBlock>*)ves_toforeign(0))->obj;
+
+    ves_pop(ves_argnum());
+
+    auto next = bb->GetNext();
+    if (next)
+    {
+        ves_pushnil();
+        ves_import_class("codegraph", "BasicBlock");
+        auto proxy = (tt::Proxy<codegraph::BasicBlock>*)ves_set_newforeign(0, 1, sizeof(tt::Proxy<codegraph::BasicBlock>));
+        proxy->obj = next;
+        ves_pop(1);
+    }
+    else
+    {
+        ves_pushnil();
+    }
 }
 
 void w_BasicBlock_print()
@@ -227,6 +253,8 @@ VesselForeignMethodFn CodeGraphBindMethod(const char* signature)
     if (strcmp(signature, "Node.gen_flow_graph()") == 0) return w_Node_gen_flow_graph;
 
     if (strcmp(signature, "BasicBlock.get_name()") == 0) return w_BasicBlock_get_name;
+    if (strcmp(signature, "BasicBlock.get_children()") == 0) return w_BasicBlock_get_children;
+    if (strcmp(signature, "BasicBlock.get_next()") == 0) return w_BasicBlock_get_next;
     if (strcmp(signature, "BasicBlock.print()") == 0) return w_BasicBlock_print;
 
     if (strcmp(signature, "static CodeGraph.parse(_)") == 0) return w_CodeGraph_parse;
