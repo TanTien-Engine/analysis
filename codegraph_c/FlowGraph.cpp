@@ -233,9 +233,11 @@ FlowGraph::BuildStatement(const std::shared_ptr<cslang::Tokenizer>& tokenizer,
 		{
 			auto if_stmt = std::static_pointer_cast<cslang::ast::IfStmtNode>(stmt);
 			auto then_bb = BuildStatement(tokenizer, if_stmt->then_stmt);
-			auto else_bb = BuildStatement(tokenizer, if_stmt->else_stmt);
 			bb->AddChild(then_bb);
-			bb->AddChild(else_bb);
+			if (if_stmt->else_stmt) {
+				auto else_bb = BuildStatement(tokenizer, if_stmt->else_stmt);
+				bb->AddChild(else_bb);
+			}
 		}
 			break;
 		}
