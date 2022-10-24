@@ -175,7 +175,10 @@ class FlowGraph is Subgraph
 
 	build_subgraph(prev, children, x, y)
 	{
-		var dx = 200
+		var dx = 150
+		if (children.count > 2) {
+			dx = 100
+		}
 		x = x - (children.count - 1) * 0.5 * dx
 
 		var end_nodes = []

@@ -2,7 +2,7 @@
 #include "Node.h"
 #include "BasicBlock.h"
 #include "VarAnalysis.h"
-#include "FlowGraph.h"
+#include "AstToCfg.h"
 #include "modules/script/TransHelper.h"
 
 #include <cslang/Parser.h>
@@ -125,11 +125,9 @@ void w_Node_gen_flow_graph()
 {
     auto node = ((tt::Proxy<codegraph::Node>*)ves_toforeign(0))->obj;
 
-    codegraph::FlowGraph fg(node);
+    auto root = codegraph::AstToCfg::Gen(node);
 
     ves_pop(ves_argnum());
-
-    auto root = fg.GetRoot();
     if (root)
     {
         ves_pushnil();
