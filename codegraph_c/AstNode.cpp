@@ -1,8 +1,5 @@
 #include "AstNode.h"
-#include "NodeName.h"
-#include "NodeRename.h"
-#include "NodeExpand.h"
-#include "NodePrint.h"
+#include "AstNodeImpl.h"
 
 namespace codegraph
 {

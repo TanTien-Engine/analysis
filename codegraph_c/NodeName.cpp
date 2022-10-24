@@ -1,4 +1,4 @@
-#include "NodeName.h"
+#include "AstNodeImpl.h"
 #include "AstNode.h"
 
 #include <cslang/Declaration.h>

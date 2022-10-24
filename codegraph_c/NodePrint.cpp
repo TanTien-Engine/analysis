@@ -1,4 +1,4 @@
-#include "NodePrint.h"
+#include "AstNodeImpl.h"
 #include "AstNode.h"
 
 #include <cslang/AST.h>
