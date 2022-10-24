@@ -5,8 +5,8 @@
 namespace codegraph
 {
 
-class Node;
+class AstNode;
 
-std::string NodeName(const Node& node);
+std::string NodeName(const AstNode& node);
 
 }

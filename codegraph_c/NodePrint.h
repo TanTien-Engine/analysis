@@ -3,8 +3,8 @@
 namespace codegraph
 {
 
-class Node;
+class AstNode;
 
-void NodePrint(const Node& node);
+void NodePrint(const AstNode& node);
 
 }

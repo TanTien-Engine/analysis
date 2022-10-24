@@ -6,8 +6,8 @@
 namespace codegraph
 {
 
-class Node;
+class AstNode;
 
-std::vector<std::shared_ptr<Node>> NodeExpand(const Node& node);
+std::vector<std::shared_ptr<AstNode>> NodeExpand(const AstNode& node);
 
 }

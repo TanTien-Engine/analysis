@@ -1,5 +1,5 @@
 #include "NodeRename.h"
-#include "Node.h"
+#include "AstNode.h"
 #include "NodeTraversal.h"
 
 #include <cslang/Declaration.h>
@@ -40,7 +40,7 @@ private:
 namespace codegraph
 {
 
-void NodeRename(const Node& _node, const std::string& name)
+void NodeRename(const AstNode& _node, const std::string& name)
 {
 	auto node = _node.GetNode();
 	switch (node->kind)

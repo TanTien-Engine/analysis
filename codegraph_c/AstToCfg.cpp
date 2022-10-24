@@ -1,7 +1,7 @@
 #include "AstToCfg.h"
 #include "BBlockBuilder.h"
 #include "BasicBlock.h"
-#include "Node.h"
+#include "AstNode.h"
 
 #include <cslang/Statement.h>
 #include <cslang/Declaration.h>
@@ -9,7 +9,7 @@
 namespace codegraph
 {
 
-std::shared_ptr<BasicBlock> AstToCfg::Gen(const std::shared_ptr<Node>& node)
+std::shared_ptr<BasicBlock> AstToCfg::Gen(const std::shared_ptr<AstNode>& node)
 {
 	auto tokenizer = node->GetTokenizer();
 	auto root = node->GetNode();

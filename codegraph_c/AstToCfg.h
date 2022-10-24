@@ -8,13 +8,13 @@ namespace cslang::ast { struct FunctionNode; struct StatementNode; }
 namespace codegraph
 {
 
-class Node;
+class AstNode;
 class BasicBlock;
 
 class AstToCfg
 {
 public:
-	static std::shared_ptr<BasicBlock> Gen(const std::shared_ptr<Node>& node);
+	static std::shared_ptr<BasicBlock> Gen(const std::shared_ptr<AstNode>& node);
 
 	static std::shared_ptr<BasicBlock> 
 		GenFunc(const std::shared_ptr<cslang::Tokenizer>& tokenizer, const std::shared_ptr<cslang::ast::FunctionNode>& func);

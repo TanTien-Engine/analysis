@@ -6,18 +6,18 @@
 namespace codegraph
 {
 
-class Node;
+class AstNode;
 
 class VarAnalysis
 {
 public:
-	VarAnalysis(const std::shared_ptr<Node>& func);
+	VarAnalysis(const std::shared_ptr<AstNode>& func);
 
-	void GetNodes(std::vector<std::shared_ptr<Node>>& variables, 
-		std::vector<std::shared_ptr<Node>>& statements) const;
+	void GetNodes(std::vector<std::shared_ptr<AstNode>>& variables,
+		std::vector<std::shared_ptr<AstNode>>& statements) const;
 
 private:
-	std::shared_ptr<Node> m_func = nullptr;
+	std::shared_ptr<AstNode> m_func = nullptr;
 
 }; // VarAnalysis
 

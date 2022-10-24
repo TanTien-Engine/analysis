@@ -1,5 +1,5 @@
 #include "NodeName.h"
-#include "Node.h"
+#include "AstNode.h"
 
 #include <cslang/Declaration.h>
 
@@ -25,7 +25,7 @@ std::string to_string(const std::shared_ptr<cslang::ast::ExpressionNode>& expr)
 namespace codegraph
 {
 
-std::string NodeName(const Node& _node)
+std::string NodeName(const AstNode& _node)
 {
 	std::string name = "unknown";
 

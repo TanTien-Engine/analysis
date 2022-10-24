@@ -77,7 +77,7 @@ void traversal_expression(const std::shared_ptr<cslang::ast::ExpressionNode>& ex
 
 	case cslang::ast::OP_CALL:
     {
-		//children.push_back(std::make_shared<codegraph::Node>(expr, root));
+		//children.push_back(std::make_shared<codegraph::AstNode>(expr, root));
 
 		//cslang::ast::ExprNodePtr p = expr->kids[1];
 

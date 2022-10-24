@@ -9,11 +9,11 @@ namespace cslang { struct Node; class Tokenizer; }
 namespace codegraph
 {
 
-class Node
+class AstNode
 {
 public:
-	Node() {}
-	Node(const std::shared_ptr<cslang::Tokenizer>& tokenizer,
+	AstNode() {}
+	AstNode(const std::shared_ptr<cslang::Tokenizer>& tokenizer,
 		const std::shared_ptr<cslang::Node>& node,
 		const std::shared_ptr<cslang::Node>& root);
 
@@ -22,7 +22,7 @@ public:
 	std::string GetName() const;
 	void SetName(const std::string& name);
 
-	std::vector<std::shared_ptr<Node>> GetChildren() const;
+	std::vector<std::shared_ptr<AstNode>> GetChildren() const;
 	auto GetRoot() const { return m_root; }
 	auto GetNode() const { return m_node; }
 
@@ -35,6 +35,6 @@ private:
 
 	std::shared_ptr<cslang::Node> m_root = nullptr;
 
-}; // Node
+}; // AstNode
 
 }

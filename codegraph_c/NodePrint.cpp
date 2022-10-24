@@ -1,5 +1,5 @@
 #include "NodePrint.h"
-#include "Node.h"
+#include "AstNode.h"
 
 #include <cslang/AST.h>
 #include <cslang/Declaration.h>
@@ -11,7 +11,7 @@
 namespace codegraph
 {
 
-void NodePrint(const Node& _node)
+void NodePrint(const AstNode& _node)
 {
 	auto node = _node.GetNode();
     switch (node->kind)

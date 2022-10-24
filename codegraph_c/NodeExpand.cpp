@@ -1,5 +1,5 @@
 #include "NodeExpand.h"
-#include "Node.h"
+#include "AstNode.h"
 #include "NodeTraversal.h"
 
 #include <cslang/Declaration.h>
@@ -19,7 +19,7 @@ public:
 
 	virtual void VisitFunction(const std::shared_ptr<cslang::ast::FunctionNode>& func) override 
 	{
-		m_children.push_back(std::make_shared<codegraph::Node>(m_tokenizer, func, m_root));
+		m_children.push_back(std::make_shared<codegraph::AstNode>(m_tokenizer, func, m_root));
 	}
 
 	auto& GetChildren() const { return m_children; }
@@ -28,7 +28,7 @@ private:
 	std::shared_ptr<cslang::Tokenizer> m_tokenizer = nullptr;
 	std::shared_ptr<cslang::Node> m_root = nullptr;
 
-	std::vector<std::shared_ptr<codegraph::Node>> m_children;
+	std::vector<std::shared_ptr<codegraph::AstNode>> m_children;
 
 }; // ExpandVisitor
 
@@ -37,7 +37,7 @@ private:
 namespace codegraph
 {
 
-std::vector<std::shared_ptr<Node>> NodeExpand(const Node& _node)
+std::vector<std::shared_ptr<AstNode>> NodeExpand(const AstNode& _node)
 {
     auto node = _node.GetNode();
     if (!node) {

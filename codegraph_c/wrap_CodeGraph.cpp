@@ -1,5 +1,5 @@
 #include "wrap_CodeGraph.h"
-#include "Node.h"
+#include "AstNode.h"
 #include "BasicBlock.h"
 #include "VarAnalysis.h"
 #include "AstToCfg.h"
@@ -12,20 +12,20 @@ namespace
 
 void w_Node_allocate()
 {
-    auto proxy = (tt::Proxy<codegraph::Node>*)ves_set_newforeign(0, 0, sizeof(tt::Proxy<codegraph::Node>));
-    proxy->obj = std::make_shared<codegraph::Node>();
+    auto proxy = (tt::Proxy<codegraph::AstNode>*)ves_set_newforeign(0, 0, sizeof(tt::Proxy<codegraph::AstNode>));
+    proxy->obj = std::make_shared<codegraph::AstNode>();
 }
 
 int w_Node_finalize(void* data)
 {
-    auto proxy = (tt::Proxy<codegraph::Node>*)(data);
+    auto proxy = (tt::Proxy<codegraph::AstNode>*)(data);
     proxy->~Proxy();
-    return sizeof(tt::Proxy<codegraph::Node>);
+    return sizeof(tt::Proxy<codegraph::AstNode>);
 }
 
 void w_Node_get_name()
 {
-    auto node = ((tt::Proxy<codegraph::Node>*)ves_toforeign(0))->obj;
+    auto node = ((tt::Proxy<codegraph::AstNode>*)ves_toforeign(0))->obj;
 
     auto name = node->GetName();
     ves_set_lstring(0, name.c_str(), name.size());
@@ -33,14 +33,14 @@ void w_Node_get_name()
 
 void w_Node_set_name()
 {
-    auto node = ((tt::Proxy<codegraph::Node>*)ves_toforeign(0))->obj;
+    auto node = ((tt::Proxy<codegraph::AstNode>*)ves_toforeign(0))->obj;
     auto name = ves_tostring(1);
     node->SetName(name);
 }
 
 void w_Node_get_children()
 {
-    auto node = ((tt::Proxy<codegraph::Node>*)ves_toforeign(0))->obj;
+    auto node = ((tt::Proxy<codegraph::AstNode>*)ves_toforeign(0))->obj;
 
     auto children = node->GetChildren();
     
@@ -52,7 +52,7 @@ void w_Node_get_children()
     {
         ves_pushnil();
         ves_import_class("codegraph", "Node");
-        auto proxy = (tt::Proxy<codegraph::Node>*)ves_set_newforeign(1, 2, sizeof(tt::Proxy<codegraph::Node>));
+        auto proxy = (tt::Proxy<codegraph::AstNode>*)ves_set_newforeign(1, 2, sizeof(tt::Proxy<codegraph::AstNode>));
         proxy->obj = children[i];
         ves_pop(1);
         ves_seti(-2, i);
@@ -62,26 +62,26 @@ void w_Node_get_children()
 
 void w_Node_get_root()
 {
-    auto node = ((tt::Proxy<codegraph::Node>*)ves_toforeign(0))->obj;
+    auto node = ((tt::Proxy<codegraph::AstNode>*)ves_toforeign(0))->obj;
 
-    auto root = std::make_shared<codegraph::Node>(node->GetTokenizer(), node->GetRoot(), node->GetRoot());
+    auto root = std::make_shared<codegraph::AstNode>(node->GetTokenizer(), node->GetRoot(), node->GetRoot());
 
     ves_pop(ves_argnum());
 
     ves_pushnil();
     ves_import_class("codegraph", "Node");
-    auto proxy = (tt::Proxy<codegraph::Node>*)ves_set_newforeign(0, 1, sizeof(tt::Proxy<codegraph::Node>));
+    auto proxy = (tt::Proxy<codegraph::AstNode>*)ves_set_newforeign(0, 1, sizeof(tt::Proxy<codegraph::AstNode>));
     proxy->obj = root;
     ves_pop(1);
 }
 
 void w_Node_gen_func_graph()
 {
-    auto node = ((tt::Proxy<codegraph::Node>*)ves_toforeign(0))->obj;
+    auto node = ((tt::Proxy<codegraph::AstNode>*)ves_toforeign(0))->obj;
 
     codegraph::VarAnalysis analysis(node);
 
-    std::vector<std::shared_ptr<codegraph::Node>> variables, statements;
+    std::vector<std::shared_ptr<codegraph::AstNode>> variables, statements;
     analysis.GetNodes(variables, statements);
 
     ves_pop(ves_argnum());
@@ -94,7 +94,7 @@ void w_Node_gen_func_graph()
         {
             ves_pushnil();
             ves_import_class("codegraph", "Node");
-            auto proxy = (tt::Proxy<codegraph::Node>*)ves_set_newforeign(2, 3, sizeof(tt::Proxy<codegraph::Node>));
+            auto proxy = (tt::Proxy<codegraph::AstNode>*)ves_set_newforeign(2, 3, sizeof(tt::Proxy<codegraph::AstNode>));
             proxy->obj = variables[i];
             ves_pop(1);
             ves_seti(-2, i);
@@ -110,7 +110,7 @@ void w_Node_gen_func_graph()
         {
             ves_pushnil();
             ves_import_class("codegraph", "Node");
-            auto proxy = (tt::Proxy<codegraph::Node>*)ves_set_newforeign(2, 3, sizeof(tt::Proxy<codegraph::Node>));
+            auto proxy = (tt::Proxy<codegraph::AstNode>*)ves_set_newforeign(2, 3, sizeof(tt::Proxy<codegraph::AstNode>));
             proxy->obj = statements[i];
             ves_pop(1);
             ves_seti(-2, i);
@@ -123,7 +123,7 @@ void w_Node_gen_func_graph()
 
 void w_Node_gen_flow_graph()
 {
-    auto node = ((tt::Proxy<codegraph::Node>*)ves_toforeign(0))->obj;
+    auto node = ((tt::Proxy<codegraph::AstNode>*)ves_toforeign(0))->obj;
 
     auto root = codegraph::AstToCfg::Gen(node);
 
@@ -244,20 +244,20 @@ void w_CodeGraph_parse()
     cslang::Parser parser(str);
     auto root = cslang::ast::DeclarationParser::ParseTranslationUnit(parser);
 
-    auto node = std::make_shared<codegraph::Node>(parser.GetTokenizerPtr(), root, root);
+    auto node = std::make_shared<codegraph::AstNode>(parser.GetTokenizerPtr(), root, root);
 
     ves_pop(ves_argnum());
 
     ves_pushnil();
     ves_import_class("codegraph", "Node");
-    auto proxy = (tt::Proxy<codegraph::Node>*)ves_set_newforeign(0, 1, sizeof(tt::Proxy<codegraph::Node>));
+    auto proxy = (tt::Proxy<codegraph::AstNode>*)ves_set_newforeign(0, 1, sizeof(tt::Proxy<codegraph::AstNode>));
     proxy->obj = node;
     ves_pop(1);
 }
 
 void w_CodeGraph_print()
 {
-    auto node = ((tt::Proxy<codegraph::Node>*)ves_toforeign(1))->obj;
+    auto node = ((tt::Proxy<codegraph::AstNode>*)ves_toforeign(1))->obj;
     node->Print();
 }
 
