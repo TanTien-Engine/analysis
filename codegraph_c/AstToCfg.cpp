@@ -69,66 +69,68 @@ AstToCfg::GenStat(const std::shared_ptr<cslang::Tokenizer>& tokenizer, const std
 		auto comp_stat = std::static_pointer_cast<cslang::ast::CompoundStmtNode>(stmt);
 		return BBlockBuilder::Split(tokenizer, comp_stat);
 	}
-	else
+
+	auto bb = std::make_shared<BasicBlock>(tokenizer, BBlockBuilder::GetName(stmt));
+	bb->AddNode(stmt);
+
+	switch (stmt->kind)
 	{
-		auto bb = std::make_shared<BasicBlock>(tokenizer, BBlockBuilder::GetName(stmt));
-		bb->AddNode(stmt);
-
-		switch (stmt->kind)
-		{
-		case cslang::NK_IfStatement:
-		{
-			auto if_stmt = std::static_pointer_cast<cslang::ast::IfStmtNode>(stmt);
-			auto then_bb = GenStat(tokenizer, if_stmt->then_stmt);
-			bb->AddChild(then_bb);
-			if (if_stmt->else_stmt) {
-				auto else_bb = GenStat(tokenizer, if_stmt->else_stmt);
-				bb->AddChild(else_bb);
-			}
+	case cslang::NK_IfStatement:
+	{
+		auto if_stmt = std::static_pointer_cast<cslang::ast::IfStmtNode>(stmt);
+		auto then_bb = GenStat(tokenizer, if_stmt->then_stmt);
+		bb->AddChild(then_bb);
+		if (if_stmt->else_stmt) {
+			auto else_bb = GenStat(tokenizer, if_stmt->else_stmt);
+			bb->AddChild(else_bb);
+		} else {
+			auto dummy = std::make_shared<BasicBlock>(tokenizer, "dummy");
+			bb->AddChild(dummy);
 		}
-			break;
-		case cslang::NK_SwitchStatement:
-		{
-			auto switch_stmt = std::static_pointer_cast<cslang::ast::SwitchStmtNode>(stmt);
-
-			auto children = BBlockBuilder::Split(tokenizer, switch_stmt);
-			for (auto& child : children) {
-				bb->AddChild(child);
-			}
-		}
-			break;
-		case cslang::NK_ForStatement:
-		{
-			auto for_stmt = std::static_pointer_cast<cslang::ast::ForStmtNode>(stmt);
-
-			//auto header = std::make_shared<BasicBlock>(tokenizer, "for");
-			//header->AddNode(for_stmt->init_decl);
-			//header->AddNode(for_stmt->expr);
-			//header->AddNode(for_stmt->incr_expr);
-
-			auto body = GenStat(tokenizer, for_stmt->stmt);
-
-			//bb->AddChild(header);
-			bb->AddChild(body);
-		}
-			break;
-		case cslang::NK_WhileStatement:
-		{
-			auto loop_stmt = std::static_pointer_cast<cslang::ast::LoopStmtNode>(stmt);
-
-			//auto header = std::make_shared<BasicBlock>(tokenizer, "while");
-			//header->AddNode(loop_stmt->expr);
-
-			auto body = GenStat(tokenizer, loop_stmt->stmt);
-
-			//bb->AddChild(header);
-			bb->AddChild(body);
-		}
-			break;
-		}
-
-		return bb;
 	}
+		break;
+	case cslang::NK_SwitchStatement:
+	{
+		auto switch_stmt = std::static_pointer_cast<cslang::ast::SwitchStmtNode>(stmt);
+
+		auto children = BBlockBuilder::Split(tokenizer, switch_stmt);
+		for (auto& child : children) {
+			bb->AddChild(child);
+		}
+	}
+		break;
+	case cslang::NK_ForStatement:
+	{
+		auto for_stmt = std::static_pointer_cast<cslang::ast::ForStmtNode>(stmt);
+
+		//auto header = std::make_shared<BasicBlock>(tokenizer, "for");
+		//header->AddNode(for_stmt->init_decl);
+		//header->AddNode(for_stmt->expr);
+		//header->AddNode(for_stmt->incr_expr);
+
+		auto body = GenStat(tokenizer, for_stmt->stmt);
+
+		//bb->AddChild(header);
+		bb->AddChild(body);
+	}
+		break;
+	case cslang::NK_WhileStatement:
+	case cslang::NK_DoStatement:
+	{
+		auto loop_stmt = std::static_pointer_cast<cslang::ast::LoopStmtNode>(stmt);
+
+		//auto header = std::make_shared<BasicBlock>(tokenizer, "while");
+		//header->AddNode(loop_stmt->expr);
+
+		auto body = GenStat(tokenizer, loop_stmt->stmt);
+
+		//bb->AddChild(header);
+		bb->AddChild(body);
+	}
+		break;
+	}
+
+	return bb;
 }
 
 }

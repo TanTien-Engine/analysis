@@ -36,6 +36,17 @@ int while_loop(int n)
     return j;
 }
 
+int do_loop(int n)
+{
+    int i = 0;
+    int j = 0;
+    do {
+        j = j + i;
+        ++i;
+    } while (i < n);
+    return j;
+}
+
 int break_loop(int n) 
 {
     int x = n * n;
