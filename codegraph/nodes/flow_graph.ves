@@ -106,7 +106,7 @@ class FlowGraph is Subgraph
 				}
 			}
 
-			if (is_end and !node.bb_node.is_exit()) {
+			if (is_end) {
 				this.connect_forward(node, next_node)
 			}
 		}
@@ -116,6 +116,10 @@ class FlowGraph is Subgraph
 
 	build_graph(entry, x, y)
 	{
+		if (entry.is_dummy()) {
+			return nil
+		}
+
 		var dy = 100
 
 		var first_node = nil
@@ -149,6 +153,16 @@ class FlowGraph is Subgraph
 					var y_min = this.connect_n_to_1(end_nodes, next_node)
 					y = y_min - dy
 					this.add_node(next_node, x, y)
+
+					var c_dummy = false
+					for (var c in prev_children) {
+						if (c.is_dummy()) {
+							c_dummy = true
+						}
+					}
+					if (c_dummy) {
+						this.connect_forward(prev_node, next_node)
+					}
 				}
 			}
 			else
@@ -190,16 +204,18 @@ class FlowGraph is Subgraph
 			var child = children[i]
 
 			var pair = this.build_graph(child, x, y)
+			if (pair)
+			{
+				var next = pair[0]
+				this.connect_forward(prev, next)
 
-			var next = pair[0]
-			this.connect_forward(prev, next)
+				end_nodes.add(pair[1])
 
-			end_nodes.add(pair[1])
+				x = x + dx
 
-			x = x + dx
-
-			if (is_loop) {
-				this.connect_backward(pair[1], prev)
+				if (is_loop) {
+					this.connect_backward(pair[1], prev)
+				}
 			}
 		}
 
