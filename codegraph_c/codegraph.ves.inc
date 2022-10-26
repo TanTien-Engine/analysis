@@ -28,6 +28,10 @@ foreign class BasicBlock
 
 	foreign is_loop()
 	foreign is_dummy()
+	foreign is_goto()
+	foreign is_label()
+
+	foreign get_label()
 }
 
 foreign class CodeGraph

@@ -99,6 +99,23 @@ int switch_case(int n)
     return z;
 }
 
+int goto_stmt(int x)
+{
+    int a = x * x;
+    if (a > 100) {
+        a = 0;
+        goto F_END;
+    }
+
+    a = a + 1;
+
+F_END:
+    a = a - 1;
+    a = a * 2;
+    
+    return a;
+}
+
 int multi_return(int n) 
 {
     if (n > 0) {
