@@ -2,6 +2,7 @@
 #include "LogParser.h"
 #include "Node.h"
 #include "Traceback.h"
+#include "Diff.h"
 #include "modules/script/TransHelper.h"
 
 #include <string>
@@ -337,6 +338,14 @@ void w_LogGraph_select()
     }
 }
 
+void w_LogGraph_diff()
+{
+    const char* path0 = ves_tostring(1);
+    const char* path1 = ves_tostring(2);
+
+    loggraph::Diff::Print(path0, path1);
+}
+
 }
 
 namespace loggraph
@@ -360,6 +369,8 @@ VesselForeignMethodFn LogGraphBindMethod(const char* signature)
     if (strcmp(signature, "static LogGraph.traceback(_)") == 0) return w_LogGraph_traceback;
     if (strcmp(signature, "static LogGraph.unique(_)") == 0) return w_LogGraph_unique;
     if (strcmp(signature, "static LogGraph.select(_,_,_)") == 0) return w_LogGraph_select;
+
+    if (strcmp(signature, "static LogGraph.diff(_,_)") == 0) return w_LogGraph_diff;
 
     return nullptr;
 }

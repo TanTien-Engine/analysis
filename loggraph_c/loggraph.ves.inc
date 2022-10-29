@@ -39,6 +39,8 @@ foreign class LogGraph
 	foreign static traceback(nodes)
 	foreign static unique(nodes)
 	foreign static select(nodes, needs, excepts)
+
+	foreign static diff(path0, path1)
 }
 
 );

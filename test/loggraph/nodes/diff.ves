@@ -1,0 +1,20 @@
+var node0 = ::loggraph::nodes::print::Print()
+
+_editor.add_node(node0, 267, 160)
+
+var node1 = ::loggraph::nodes::diff::Diff()
+
+_editor.add_node(node1, -95, 93)
+
+var node2 = ::loggraph::nodes::string::String()
+node2.query_param("str").value = "../assets/diff0.txt"
+
+_editor.add_node(node2, -248.18031555222, 122.4973703982)
+
+var node3 = ::loggraph::nodes::string::String()
+node3.query_param("str").value = "../assets/diff1.txt"
+
+_editor.add_node(node3, -251.70398196844, 64.486851990984)
+
+Blueprint.connect(node2, "str", node1, "path0")
+Blueprint.connect(node3, "str", node1, "path1")

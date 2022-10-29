@@ -3,4 +3,5 @@ import "loggraph.nodes.*"
 var LOG_NODES = [ 
 File, Split, Sort, RmDup, Parse, 
 Print, Histogram, Find, Traceback, Unique, Select, String,
+Diff,
 ]
