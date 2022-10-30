@@ -1,0 +1,43 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.blueprint" for Blueprint
+import "blueprint.variant" for Variant, VAR_TYPE_STRING
+import "loggraph" for LogGraph
+
+class RegexReplace is Node
+{
+	init() 
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "text", VAR_TYPE_STRING),
+			Pin(this, "re", VAR_TYPE_STRING),
+			Pin(this, "fmt", VAR_TYPE_STRING),			
+		]
+		this.exports = [
+			Pin(this, "text", VAR_TYPE_STRING),
+		]
+
+		this.layout()
+	}
+
+	calc_value(idx) 
+	{
+		var v_text = Blueprint.calc_input_value(this, 0)
+		if (!v_text) {
+			return nil
+		}
+		var v_re = Blueprint.calc_input_value(this, 1)
+		if (!v_re) {
+			return nil
+		}
+		var v_fmt = Blueprint.calc_input_value(this, 2)
+		if (!v_fmt) {
+			return nil
+		}
+
+		var text = LogGraph.regex_replace(v_text.value, v_re.value, v_fmt.value)
+		return Variant(VAR_TYPE_STRING, text)
+	}
+}

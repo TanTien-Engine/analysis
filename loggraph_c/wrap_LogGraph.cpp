@@ -3,6 +3,7 @@
 #include "Node.h"
 #include "Traceback.h"
 #include "Diff.h"
+#include "Regex.h"
 #include "modules/script/TransHelper.h"
 
 #include <string>
@@ -346,6 +347,16 @@ void w_LogGraph_diff()
     loggraph::Diff::Print(path0, path1);
 }
 
+void w_LogGraph_regex_replace()
+{
+    const char* text = ves_tostring(1);
+    const char* re   = ves_tostring(2);
+    const char* fmt  = ves_tostring(3);
+
+    auto ret = loggraph::Regex::Replace(text, re, fmt);
+    ves_set_lstring(0, ret.c_str(), ret.size());
+}
+
 }
 
 namespace loggraph
@@ -371,6 +382,8 @@ VesselForeignMethodFn LogGraphBindMethod(const char* signature)
     if (strcmp(signature, "static LogGraph.select(_,_,_)") == 0) return w_LogGraph_select;
 
     if (strcmp(signature, "static LogGraph.diff(_,_)") == 0) return w_LogGraph_diff;
+
+    if (strcmp(signature, "static LogGraph.regex_replace(_,_,_)") == 0) return w_LogGraph_regex_replace;
 
     return nullptr;
 }

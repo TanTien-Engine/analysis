@@ -41,6 +41,8 @@ foreign class LogGraph
 	foreign static select(nodes, needs, excepts)
 
 	foreign static diff(path0, path1)
+
+	foreign static regex_replace(text, re, fmt)
 }
 
 );

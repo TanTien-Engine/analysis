@@ -1,0 +1,27 @@
+var node0 = ::loggraph::nodes::print::Print()
+
+_editor.add_node(node0, 125.40796393689, 350.28925619835)
+
+var node1 = ::loggraph::nodes::regex_replace::RegexReplace()
+
+_editor.add_node(node1, -47, 330)
+
+var node2 = ::loggraph::nodes::string::String()
+node2.query_param("str").value = "Quick brown fox"
+
+_editor.add_node(node2, -196, 378)
+
+var node3 = ::loggraph::nodes::string::String()
+node3.query_param("str").value = "a|e|i|o|u"
+
+_editor.add_node(node3, -194, 326)
+
+var node4 = ::loggraph::nodes::string::String()
+node4.query_param("str").value = "[$&]"
+
+_editor.add_node(node4, -195, 275)
+
+Blueprint.connect(node2, "str", node1, "text")
+Blueprint.connect(node3, "str", node1, "re")
+Blueprint.connect(node4, "str", node1, "fmt")
+Blueprint.connect(node1, "text", node0, "items")
