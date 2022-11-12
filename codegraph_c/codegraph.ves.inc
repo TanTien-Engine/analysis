@@ -21,17 +21,12 @@ foreign class BasicBlock
 
 	foreign get_name()
 	foreign get_children()
-
-	foreign get_next()
+	foreign get_output()
+	foreign get_target()
 
 	foreign print()
 
-	foreign is_loop()
-	foreign is_dummy()
-	foreign is_goto()
-	foreign is_label()
-
-	foreign get_label()
+	foreign get_uid()
 }
 
 foreign class CodeGraph

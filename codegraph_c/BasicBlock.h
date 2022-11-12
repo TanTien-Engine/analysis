@@ -33,6 +33,16 @@ public:
 	auto GetNext() const { return m_next; }
 	auto GetPrev() const { return m_prev; }
 
+	void AddInput(const std::shared_ptr<BasicBlock>& bb) { m_input.push_back(bb); }
+	void AddOutput(const std::shared_ptr<BasicBlock>& bb) { m_output.push_back(bb); }
+
+	auto& GetOutput() const { return m_output; }
+
+	auto GetTokenizer() const { return m_tokenizer; }
+
+	auto GetTarget() const { return m_target; }
+	auto SetTarget(const std::shared_ptr<BasicBlock>& target) { m_target = target; }
+
 private:
 	std::shared_ptr<cslang::Tokenizer> m_tokenizer = nullptr;
 
@@ -41,8 +51,10 @@ private:
 	std::string m_name;
 
 	std::shared_ptr<BasicBlock> m_prev = nullptr, m_next = nullptr;
-
 	std::vector<std::shared_ptr<BasicBlock>> m_children;
+
+	std::vector<std::shared_ptr<BasicBlock>> m_input, m_output;
+	std::shared_ptr<BasicBlock> m_target = nullptr;
 
 }; // BasicBlock
 

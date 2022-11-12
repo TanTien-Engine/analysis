@@ -185,13 +185,35 @@ void w_BasicBlock_get_children()
     }
 }
 
-void w_BasicBlock_get_next()
+void w_BasicBlock_get_output()
+{
+    auto bb = ((tt::Proxy<codegraph::BasicBlock>*)ves_toforeign(0))->obj;
+
+    auto& output = bb->GetOutput();
+
+    ves_pop(ves_argnum());
+
+    const int num = (int)(output.size());
+    ves_newlist(num);
+    for (int i = 0; i < num; ++i)
+    {
+        ves_pushnil();
+        ves_import_class("codegraph", "BasicBlock");
+        auto proxy = (tt::Proxy<codegraph::BasicBlock>*)ves_set_newforeign(1, 2, sizeof(tt::Proxy<codegraph::BasicBlock>));
+        proxy->obj = output[i];
+        ves_pop(1);
+        ves_seti(-2, i);
+        ves_pop(1);
+    }
+}
+
+void w_BasicBlock_get_target()
 {
     auto bb = ((tt::Proxy<codegraph::BasicBlock>*)ves_toforeign(0))->obj;
 
     ves_pop(ves_argnum());
 
-    auto next = bb->GetNext();
+    auto next = bb->GetTarget();
     if (next)
     {
         ves_pushnil();
@@ -212,84 +234,15 @@ void w_BasicBlock_print()
     bb->Print();
 }
 
-bool check_bb_type(const std::shared_ptr<codegraph::BasicBlock>& bb, const std::vector<int>& types)
-{
-    auto& nodes = bb->GetNodes();
-    if (nodes.empty()) {
-        return false;
-    }
-
-    bool ret = false;
-
-    auto stmt = std::static_pointer_cast<cslang::ast::StatementNode>(nodes.back());
-    for (auto type : types) {
-        if (type == stmt->kind) {
-            ret = true;
-            break;
-        }
-    }
-
-    return ret;
-}
-
-void w_BasicBlock_is_loop()
-{
-    auto bb = ((tt::Proxy<codegraph::BasicBlock>*)ves_toforeign(0))->obj;
-    auto is_loop = check_bb_type(bb, { cslang::NK_ForStatement, cslang::NK_WhileStatement, cslang::NK_DoStatement });
-    ves_set_boolean(0, is_loop);
-}
-
-void w_BasicBlock_is_dummy()
-{
-    auto bb = ((tt::Proxy<codegraph::BasicBlock>*)ves_toforeign(0))->obj;
-    bool is_dummy = bb->GetNodes().empty();
-    ves_set_boolean(0, is_dummy);
-}
-
-void w_BasicBlock_is_goto()
-{
-    auto bb = ((tt::Proxy<codegraph::BasicBlock>*)ves_toforeign(0))->obj;
-    auto is_goto = check_bb_type(bb, { cslang::NK_GotoStatement });
-    ves_set_boolean(0, is_goto);
-}
-
-void w_BasicBlock_is_label()
-{
-    auto bb = ((tt::Proxy<codegraph::BasicBlock>*)ves_toforeign(0))->obj;
-    auto is_label = check_bb_type(bb, { cslang::NK_LabelStatement });
-    ves_set_boolean(0, is_label);
-}
-
-void w_BasicBlock_get_label()
+void w_BasicBlock_get_uid()
 {
     auto bb = ((tt::Proxy<codegraph::BasicBlock>*)ves_toforeign(0))->obj;
 
-    auto& nodes = bb->GetNodes();
-    if (nodes.empty()) {
-        ves_set_nil(0);
-        return;
-    }
+    std::stringstream ss;
+    ss << bb.get();
+    std::string uid = ss.str();
 
-    const char* label = nullptr;
-
-    auto stmt = std::static_pointer_cast<cslang::ast::StatementNode>(nodes.back());
-    if (stmt->kind == cslang::NK_GotoStatement) 
-    {
-        auto goto_stat = std::static_pointer_cast<cslang::ast::GotoStmtNode>(stmt);
-        label = goto_stat->id;
-    }
-    else if (stmt->kind == cslang::NK_LabelStatement)
-    {
-        auto label_stat = std::static_pointer_cast<cslang::ast::LabelStmtNode>(stmt);
-        label = label_stat->id;
-    }
-
-
-    if (label) {
-        ves_set_lstring(0, label, strlen(label));
-    } else {
-        ves_set_nil(0);
-    }
+    ves_set_lstring(0, uid.c_str(), uid.size());
 }
 
 void w_CodeGraph_parse()
@@ -332,13 +285,10 @@ VesselForeignMethodFn CodeGraphBindMethod(const char* signature)
 
     if (strcmp(signature, "BasicBlock.get_name()") == 0) return w_BasicBlock_get_name;
     if (strcmp(signature, "BasicBlock.get_children()") == 0) return w_BasicBlock_get_children;
-    if (strcmp(signature, "BasicBlock.get_next()") == 0) return w_BasicBlock_get_next;
+    if (strcmp(signature, "BasicBlock.get_output()") == 0) return w_BasicBlock_get_output;
+    if (strcmp(signature, "BasicBlock.get_target()") == 0) return w_BasicBlock_get_target;
     if (strcmp(signature, "BasicBlock.print()") == 0) return w_BasicBlock_print;
-    if (strcmp(signature, "BasicBlock.is_loop()") == 0) return w_BasicBlock_is_loop;
-    if (strcmp(signature, "BasicBlock.is_dummy()") == 0) return w_BasicBlock_is_dummy;
-    if (strcmp(signature, "BasicBlock.is_goto()") == 0) return w_BasicBlock_is_goto;
-    if (strcmp(signature, "BasicBlock.is_label()") == 0) return w_BasicBlock_is_label;
-    if (strcmp(signature, "BasicBlock.get_label()") == 0) return w_BasicBlock_get_label;
+    if (strcmp(signature, "BasicBlock.get_uid()") == 0) return w_BasicBlock_get_uid;
 
     if (strcmp(signature, "static CodeGraph.parse(_)") == 0) return w_CodeGraph_parse;
     if (strcmp(signature, "static CodeGraph.print(_)") == 0) return w_CodeGraph_print;

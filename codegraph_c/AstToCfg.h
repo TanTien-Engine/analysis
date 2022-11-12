@@ -10,6 +10,7 @@ namespace codegraph
 
 class AstNode;
 class BasicBlock;
+struct FuncContext;
 
 class AstToCfg
 {
@@ -20,7 +21,7 @@ public:
 		GenFunc(const std::shared_ptr<cslang::Tokenizer>& tokenizer, const std::shared_ptr<cslang::ast::FunctionNode>& func);
 
 	static std::shared_ptr<BasicBlock> 
-		GenStat(const std::shared_ptr<cslang::Tokenizer>& tokenizer, const std::shared_ptr<cslang::ast::StatementNode>& stmt);
+		GenStat(const std::shared_ptr<cslang::Tokenizer>& tokenizer, const std::shared_ptr<cslang::ast::StatementNode>& stmt, FuncContext& ctx);
 
 }; // AstToCfg
 

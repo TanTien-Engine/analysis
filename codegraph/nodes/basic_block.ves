@@ -19,6 +19,9 @@ class BasicBlock is Vertex
 		]
 
 		this.bb_node = nil
+
+		// y, x_min, x_max
+		this.pos3 = [ 0, 0, 0 ]
 	}
 
 	calc_value(idx)

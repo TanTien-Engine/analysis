@@ -1,17 +1,59 @@
 #include "BBlockBuilder.h"
 #include "BasicBlock.h"
+#include "BBlockTools.h"
 #include "AstToCfg.h"
+#include "FuncContext.h"
 
 #include <cslang/Statement.h>
+
+#include <map>
 
 namespace
 {
 
+std::string get_label_name(const std::shared_ptr<codegraph::BasicBlock>& bb)
+{
+	auto& nodes = bb->GetNodes();
+	if (nodes.empty()) {
+		return nullptr;
+	}
+
+	const char* label = nullptr;
+
+	auto stmt = std::static_pointer_cast<cslang::ast::StatementNode>(nodes.back());
+	if (stmt->kind == cslang::NK_GotoStatement)
+	{
+		auto goto_stat = std::static_pointer_cast<cslang::ast::GotoStmtNode>(stmt);
+		label = goto_stat->id;
+	}
+	else if (stmt->kind == cslang::NK_LabelStatement)
+	{
+		auto label_stat = std::static_pointer_cast<cslang::ast::LabelStmtNode>(stmt);
+		label = label_stat->id;
+	}
+
+	return label;
+}
+
 class ListBB
 {
 public:
-	void Add(const std::shared_ptr<codegraph::BasicBlock>& bb)
+	void Add(const std::shared_ptr<codegraph::BasicBlock>& bb, codegraph::FuncContext& ctx)
 	{
+		auto is_loop = codegraph::BBlockTools::IsLoop(bb);
+		if (!is_loop && codegraph::BBlockTools::IsGoto(bb))
+		{
+			auto name = get_label_name(bb);
+			ctx.gotos.insert({ name, bb });
+		}
+		else if (codegraph::BBlockTools::IsLabel(bb))
+		{
+			auto name = get_label_name(bb);
+			for (auto range = ctx.gotos.equal_range(name); range.first != range.second; ++range.first) {
+				range.first->second->SetTarget(bb);
+			}
+		}
+
 		if (m_curr)
 		{
 			codegraph::BBlockBuilder::Connect(m_curr, bb);
@@ -21,6 +63,14 @@ public:
 		{
 			m_head = bb;
 			m_curr = bb;
+		}
+
+		if (is_loop) 
+		{
+			auto tokenizer = bb->GetTokenizer();
+			auto dummy = std::make_shared<codegraph::BasicBlock>(tokenizer, "loop_end");
+			dummy->SetTarget(bb);
+			Add(dummy, ctx);
 		}
 	};
 
@@ -84,7 +134,7 @@ BBlockBuilder::Merge(const std::shared_ptr<cslang::Tokenizer>& tokenizer, std::v
 }
 
 std::shared_ptr<codegraph::BasicBlock>
-BBlockBuilder::Split(const std::shared_ptr<cslang::Tokenizer>& tokenizer, const std::shared_ptr<cslang::ast::CompoundStmtNode>& comp)
+BBlockBuilder::Split(const std::shared_ptr<cslang::Tokenizer>& tokenizer, const std::shared_ptr<cslang::ast::CompoundStmtNode>& comp, FuncContext& ctx)
 {
 	ListBB list_bb;
 
@@ -102,17 +152,17 @@ BBlockBuilder::Split(const std::shared_ptr<cslang::Tokenizer>& tokenizer, const 
 		else
 		{
 			if (!merged.empty()) {
-				list_bb.Add(Merge(tokenizer, merged));
+				list_bb.Add(Merge(tokenizer, merged), ctx);
 			}
 
-			list_bb.Add(AstToCfg::GenStat(tokenizer, c_stmt));
+			list_bb.Add(AstToCfg::GenStat(tokenizer, c_stmt, ctx), ctx);
 		}
 
 		p = p->next;
 	}
 
 	if (!merged.empty()) {
-		list_bb.Add(Merge(tokenizer, merged));
+		list_bb.Add(Merge(tokenizer, merged), ctx);
 	}
 
 	return list_bb.GetHead();

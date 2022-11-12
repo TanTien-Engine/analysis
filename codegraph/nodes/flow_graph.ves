@@ -4,7 +4,7 @@ import "blueprint.nodes.subgraph" for Subgraph
 import "codegraph.variant" for VAR_TYPE_NODE
 import "codegraph.nodes.basic_block" for BasicBlock
 import "network.network" for Network
-import "network.vertex_shape" for PIN_CAPSULE_TOP_IDX, PIN_CAPSULE_BOTTOM_IDX, PIN_CAPSULE_RIGHT_IDX
+import "network.vertex_shape" for PIN_CAPSULE_TOP_IDX, PIN_CAPSULE_BOTTOM_IDX, PIN_CAPSULE_RIGHT_IDX, PIN_CAPSULE_LEFT_IDX
 import "network.pin" for Pin as NW_Pin
 import "maths" for Matrix2D
 
@@ -73,201 +73,104 @@ class FlowGraph is Subgraph
 		var children = root.get_children()
 		for (var i = 0; i < children.count; i = i + 1) 
 		{
-			var begin = this.all_items.count
-			this.build_graph(children[i], i * 400, 0)
+			var map2node = {}
+			this.build_graph(children[i], i * 400, 0, map2node)
 
-			this.match_goto_and_label(begin, this.all_items.count)
+			// conn to targ
+			for (var pair in map2node) 
+			{
+				var node = pair.value
+				var targ = node.bb_node.get_target()
+				if (targ) {
+					this.connect_skip(node, map2node[targ.get_uid()])
+				}
+			}
+
+			// fix pos
+			for (var pair in map2node) 
+			{
+				var node = pair.value
+				var x = (node.pos3[1] + node.pos3[2]) / 2
+				var y = node.pos3[0]
+				this.add_node(node, x, y)
+			}
 		}
+	}
+
+	build_graph(bb, x, y, map2node)
+	{
+		var bb_uid = bb.get_uid()
+
+		var node = map2node[bb_uid]
+		if (!node)
+		{
+			node = BasicBlock()
+
+			node.bb_node = bb
+
+			node.pos3[0] = y
+			node.pos3[1] = x
+			node.pos3[2] = x
+
+			map2node[bb_uid] = node
+		}
+		else
+		{
+			if (node.pos3[0] > y) {
+				node.pos3[0] = y
+			}
+			node.pos3[2] = x
+		}
+
+		var output = bb.get_output()
+		if (output.isEmpty) {
+			return node
+		}
+
+		var dy = 100
+		y = y - dy
+
+		var dx = 150
+		if (output.count > 2) {
+			dx = 100
+		}
+		x = x - (output.count - 1) * 0.5 * dx
+
+		for (var item in output) 
+		{
+			var child = this.build_graph(item, x, y, map2node)
+			if (child) {
+				this.connect_forward(node, child)			
+			}
+
+			x = x + dx
+		}
+
+		return node
 	}
 
 	connect_forward(prev, next)
 	{
-		var pin_f = NW_Pin(prev, PIN_CAPSULE_BOTTOM_IDX)
-		var pin_t = NW_Pin(next, PIN_CAPSULE_TOP_IDX)
-		Network.connect(pin_f, pin_t)
+		this.connect(prev, next, PIN_CAPSULE_TOP_IDX)
 	}
 
-	connect_backward(prev, next)
+	connect_skip(prev, next)
+	{
+		var prev_y = prev.pos3[0]
+		var next_y = next.pos3[0]
+
+		var pos = PIN_CAPSULE_RIGHT_IDX
+		if (next_y < prev_y) {
+			pos = PIN_CAPSULE_LEFT_IDX
+		}
+
+		this.connect(prev, next, pos)
+	}
+
+	connect(prev, next, next_pos)
 	{
 		var pin_f = NW_Pin(prev, PIN_CAPSULE_BOTTOM_IDX)
-		var pin_t = NW_Pin(next, PIN_CAPSULE_RIGHT_IDX)
+		var pin_t = NW_Pin(next, next_pos)
 		Network.connect(pin_f, pin_t)
-	}
-
-	connect_n_to_1(prev_nodes, next_node)
-	{
-		if (prev_nodes.isEmpty or !next_node) {
-			return nil
-		}
-
-		var y_min = prev_nodes[0].pos.y
-
-		var buf = []
-		for (var n in prev_nodes) {
-			buf.add(n)
-		}
-
-		while (!buf.isEmpty)
-		{
-			var node = buf[0]
-			buf.pop_front()
-
-			var is_end = true
-			var y_node = node.pos.y
-
-			var next_nodes = Network.neighbors(node, PIN_CAPSULE_BOTTOM_IDX)
-			for (var n_node in next_nodes)
-			{
-				var y_next = n_node.pos.y
-				if (y_next < y_node) 
-				{
-					buf.add(n_node)
-					is_end = false
-					y_min = y_next
-				}
-			}
-
-			if (is_end and !node.bb_node.is_goto()) {
-				this.connect_forward(node, next_node)
-			}
-		}
-
-		return y_min
-	}
-
-	build_graph(entry, x, y)
-	{
-		if (entry.is_dummy()) {
-			return nil
-		}
-
-		var dy = 100
-
-		var first_node = nil
-		var last_node = nil
-
-		var prev_node = nil
-
-		var curr = entry
-		while (curr)
-		{
-			var next_node = BasicBlock()
-			next_node.bb_node = curr
-
-			if (!first_node) {
-				first_node = next_node
-			}
-			last_node = next_node
-
-			if (prev_node)
-			{
-				var prev_children = prev_node.bb_node.get_children()
-				if (prev_children.isEmpty)
-				{
-					this.add_node(next_node, x, y)
-					this.connect_forward(prev_node, next_node)
-				}
-				else
-				{
-					var end_nodes = this.build_subgraph(prev_node, prev_children, x, y)
-
-					var y_min = this.connect_n_to_1(end_nodes, next_node)
-					y = y_min - dy
-					this.add_node(next_node, x, y)
-
-					var c_dummy = false
-					for (var c in prev_children) {
-						if (c.is_dummy()) {
-							c_dummy = true
-						}
-					}
-					if (c_dummy) {
-						this.connect_forward(prev_node, next_node)
-					}
-				}
-			}
-			else
-			{
-				this.add_node(next_node, x, y)
-			}
-			y = y - dy
-
-			prev_node = next_node
-
-			curr = curr.get_next()
-		}
-
-		if (prev_node)
-		{
-			var prev_children = prev_node.bb_node.get_children()
-			if (!prev_children.isEmpty) {
-				this.build_subgraph(prev_node, prev_children, x, y)
-			}
-		}
-
-		return [first_node, last_node]
-	}
-
-	build_subgraph(prev, children, x, y)
-	{
-		var dx = 150
-		if (children.count > 2) {
-			dx = 100
-		}
-		x = x - (children.count - 1) * 0.5 * dx
-
-		var end_nodes = []
-
-		var is_loop = prev.bb_node.is_loop()
-
-		for (var i = 0; i < children.count; i = i + 1)
-		{
-			var child = children[i]
-
-			var pair = this.build_graph(child, x, y)
-			if (pair)
-			{
-				var next = pair[0]
-				this.connect_forward(prev, next)
-
-				end_nodes.add(pair[1])
-
-				x = x + dx
-
-				if (is_loop) {
-					this.connect_backward(pair[1], prev)
-				}
-			}
-		}
-
-		return end_nodes
-	}
-
-	match_goto_and_label(begin, end)
-	{
-		if (begin >= end) {
-			return
-		}
-
-		var map2bb = {}
-
-		for (var i in begin .. end)
-		{
-			var bb = this.all_items[i][0].bb_node
-			if (bb.is_label()) {
-				map2bb[bb.get_label()] = i
-			}
-		}
-
-		for (var i in begin .. end)
-		{
-			var bb = this.all_items[i][0].bb_node
-			if (bb.is_goto()) {
-				var idx = map2bb[bb.get_label()]
-				if (idx) {
-					this.connect_forward(this.all_items[i][0], this.all_items[idx][0])
-				}
-			}
-		}		
 	}
 }

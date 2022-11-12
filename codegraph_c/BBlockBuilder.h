@@ -11,6 +11,7 @@ namespace codegraph
 {
 
 class BasicBlock;
+struct FuncContext;
 
 class BBlockBuilder
 {
@@ -21,8 +22,8 @@ public:
 	static std::shared_ptr<codegraph::BasicBlock>
 		Merge(const std::shared_ptr<cslang::Tokenizer>& tokenizer, std::vector<std::shared_ptr<cslang::Node>>& merged);
 
-	static std::shared_ptr<codegraph::BasicBlock>
-		Split(const std::shared_ptr<cslang::Tokenizer>& tokenizer, const std::shared_ptr<cslang::ast::CompoundStmtNode>& comp);
+	static std::shared_ptr<codegraph::BasicBlock> Split(const std::shared_ptr<cslang::Tokenizer>& tokenizer, 
+		const std::shared_ptr<cslang::ast::CompoundStmtNode>& comp, FuncContext& ctx);
 	static std::vector<std::shared_ptr<codegraph::BasicBlock>>
 		Split(const std::shared_ptr<cslang::Tokenizer>& tokenizer, const std::shared_ptr<cslang::ast::SwitchStmtNode>& switch_stmt);
 
