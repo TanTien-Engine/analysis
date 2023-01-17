@@ -24,8 +24,12 @@ Traceback::Traceback(const std::string& filepath,
 	, m_data(data)
 	, m_hash(0)
 {
-	for (auto& str : data->strings) {
-		hash_combine(m_hash, str);
+	for (auto& var : data->GetAllData()) 
+	{
+		if (var.type == VarType::String) {
+			auto str = std::string(static_cast<const char*>(var.obj));
+			hash_combine(m_hash, str);
+		}
 	}
 }
 

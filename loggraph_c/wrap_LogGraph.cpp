@@ -33,7 +33,7 @@ void w_Node_get_type()
 {
     auto node = ((tt::Proxy<loggraph::Node>*)ves_toforeign(0))->obj;
 
-    auto& type = node->type;
+    auto& type = node->GetType();
     ves_set_lstring(0, type.c_str(), type.size());
 }
 
@@ -41,7 +41,7 @@ void w_Node_get_name()
 {
     auto node = ((tt::Proxy<loggraph::Node>*)ves_toforeign(0))->obj;
 
-    auto& name = node->name;
+    auto& name = node->GetName();
     ves_set_lstring(0, name.c_str(), name.size());
 }
 
@@ -51,14 +51,15 @@ void w_Node_get_children()
 
     ves_pop(ves_argnum());
 
-    const int num = (int)(node->children.size());
+    auto& children = node->GetAllChildren();
+    const int num = (int)(children.size());
     ves_newlist(num);
     for (int i = 0; i < num; ++i)
     {
         ves_pushnil();
         ves_import_class("loggraph", "Node");
         auto proxy = (tt::Proxy<loggraph::Node>*)ves_set_newforeign(1, 2, sizeof(tt::Proxy<loggraph::Node>));
-        proxy->obj = node->children[i];
+        proxy->obj = children[i];
         ves_pop(1);
         ves_seti(-2, i);
         ves_pop(1);
@@ -68,7 +69,14 @@ void w_Node_get_children()
 void w_Node_get_items()
 {
     auto node = ((tt::Proxy<loggraph::Node>*)ves_toforeign(0))->obj;
-    tt::return_list(node->items);
+
+    std::vector<int> items;
+    for (auto& var : node->GetAllData()) {
+        if (var.type == loggraph::VarType::Integer) {
+            items.push_back(var.i);
+        }
+    }
+    tt::return_list(items);
 }
 
 void w_Node_has_item()
@@ -78,8 +86,8 @@ void w_Node_has_item()
     auto item = (int)ves_tonumber(1);
 
     bool find = false;
-    for (auto& i : node->items) {
-        if (i == item) {
+    for (auto& var : node->GetAllData()) {
+        if (var.type == loggraph::VarType::Integer && var.i == item) {
             find = true;
             break;
         }
@@ -94,10 +102,12 @@ void w_Traceback_print()
 
     printf("++ %s\n", traceback->GetFilepath().c_str());
 
-    auto data = traceback->GetData();
-    for (size_t i = 0, n = data->strings.size(); i < n; ) {
+    auto& data = traceback->GetData()->GetAllData();
+    for (size_t i = 0, n = data.size(); i < n; )
+    {
+        assert(data[i].type == loggraph::VarType::String);
         for (int j = 0; j < 3; ++j) {
-            printf("%s ", data->strings[i].c_str());
+            printf("%s ", static_cast<const char*>(data[i].obj));
             ++i;
         }
         printf("\n");
@@ -228,13 +238,13 @@ void w_LogGraph_traceback()
     std::vector<std::shared_ptr<loggraph::Traceback>> ret;
     for (auto p : nodes)
     {
-        for (auto c : p->children)
+        for (auto& c : p->GetAllChildren())
         {
-            if (c->type != "traceback") {
+            if (c->GetType() != "traceback") {
                 continue;
             }
 
-            auto tb = std::make_shared<loggraph::Traceback>(p->name, c);
+            auto tb = std::make_shared<loggraph::Traceback>(p->GetName(), c);
             ret.push_back(tb);
         }
     }
@@ -302,8 +312,14 @@ void w_LogGraph_select()
     {
         int n_pass = 0;
         int n_fail = 0;
-        for (auto& item : node->strings)
+        for (auto& var : node->GetAllData())
         {
+            if (var.type != loggraph::VarType::String) {
+                continue;
+            }
+
+            std::string item = std::string(static_cast<const char*>(var.obj));
+
             for (auto& str : needs) {
                 if (item == str) {
                     ++n_pass;

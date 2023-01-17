@@ -138,16 +138,15 @@ void LogParser::ParseNode()
         {
             m_tokenizer.NextToken();
 
-            auto node = std::make_shared<Node>();
+            token = m_tokenizer.NextToken();
+            Expect(LogToken::String, token);
+            std::string type = token.Data();
 
             token = m_tokenizer.NextToken();
             Expect(LogToken::String, token);
-            node->type = token.Data();
+            std::string name = token.Data();
 
-            token = m_tokenizer.NextToken();
-            Expect(LogToken::String, token);
-            node->name = token.Data();
-
+            auto node = std::make_shared<Node>(type, name);
             m_curr_nodes.push_back(node);
         }
 			break;
@@ -163,21 +162,28 @@ void LogParser::ParseNode()
                 m_nodes.push_back(node);
                 return;
             } else {
-                m_curr_nodes.back()->children.push_back(node);
+                m_curr_nodes.back()->AddChild(node);
             }
         }
 			break;
         case LogToken::Integer:
         {
             assert(!m_curr_nodes.empty());
-            m_curr_nodes.back()->items.push_back(token.ToInteger<int>());
+            m_curr_nodes.back()->AddData(token.ToInteger<int>());
+            token = m_tokenizer.NextToken();
+        }
+            break;
+        case LogToken::Decimal:
+        {
+            assert(!m_curr_nodes.empty());
+            m_curr_nodes.back()->AddData(token.ToFloat<double>());
             token = m_tokenizer.NextToken();
         }
             break;
         case LogToken::String:
         {
             assert(!m_curr_nodes.empty());
-            m_curr_nodes.back()->strings.push_back(token.Data());
+            m_curr_nodes.back()->AddData(token.Data());
             token = m_tokenizer.NextToken();
         }
             break;

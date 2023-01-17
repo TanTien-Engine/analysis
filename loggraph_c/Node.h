@@ -3,20 +3,58 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <set>
 
 namespace loggraph
 {
 
+enum class VarType
+{
+	Invalid = 0,
+
+	Integer,
+	Double,
+	String,
+};
+
+struct Variant
+{
+	VarType type;
+	union
+	{
+		int64_t i;
+		double  d;
+		const void* obj;
+	};
+};
+
 class Node
 {
 public:
-	std::string type;
-	std::string name;
+	Node() {}
+	Node(const std::string& type, const std::string& name);
 
-	std::vector<std::shared_ptr<Node>> children;
+	auto& GetType() const { return m_type; }
+	auto& GetName() const { return m_name; }
 
-	std::vector<int> items;
-	std::vector<std::string> strings;
+	auto& GetAllChildren() const { return m_children; }
+	auto& GetAllData() const { return m_data; }
+
+	void AddChild(const std::shared_ptr<Node>& c);
+
+	void AddData(int i);
+	void AddData(double d);
+	void AddData(const std::string& s);
+
+private:
+	std::string m_type;
+	std::string m_name;
+
+	std::vector<std::shared_ptr<Node>> m_children;
+
+	std::vector<Variant> m_data;
+
+	static std::set<std::string> m_strings;
 
 }; // Node
 
