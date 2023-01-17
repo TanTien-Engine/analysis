@@ -1,5 +1,5 @@
-$begin parent0
-$begin child0
+$begin node parent0
+$begin node child0
 123
 12
 1
@@ -8,12 +8,12 @@ $begin child0
 55
 66
 $end
-$begin child1
+$begin node child1
 11
 22
 33
 $end
-$begin child2
+$begin node child2
 14
 26
 3
@@ -21,21 +21,21 @@ $begin child2
 $end
 $end
 
-$begin parent1
-$begin child2
+$begin node parent1
+$begin node child2
 123
 567
 234
 $end
 $end
 
-$begin parent2
-$begin child0
+$begin node parent2
+$begin node child0
 123
 567
 234
 $end
-$begin child1
+$begin node child1
 123
 567
 234
