@@ -61,6 +61,7 @@ class File is Node
 		}
 
 		var str = file.read()
+		IO.close(file)
 
 		if (old_dir != "") {
 			Filesystem.set_asset_base_dir(old_dir)
@@ -69,6 +70,6 @@ class File is Node
 		this.filepath = absolute
 		this.last_write_time = Filesystem.get_file_last_write_time(this.filepath)
 
-		return Variant(str)		
+		return Variant(str)
 	}
 }
