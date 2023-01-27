@@ -22,6 +22,8 @@ class File is Node
 
 		this.filepath = nil
 		this.last_write_time = 0
+
+		this.data = nil
 	}
 
 	render_run() 
@@ -40,7 +42,10 @@ class File is Node
 
 	calc_value(idx)
 	{
-		return this.load_from_file()
+		if (!this.data) {
+			this.load_from_file()
+		}
+		return this.data
 	}
 
 	load_from_file()
@@ -70,6 +75,6 @@ class File is Node
 		this.filepath = absolute
 		this.last_write_time = Filesystem.get_file_last_write_time(this.filepath)
 
-		return Variant(str)
+		this.data = str
 	}
 }
