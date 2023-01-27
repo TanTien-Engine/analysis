@@ -15,6 +15,6 @@ var node3 = ::loggraph::nodes::print::Print()
 
 _editor.add_node(node3, 267, 160)
 
-Blueprint.connect(node0, "str", node1, "str")
+Blueprint.connect(node0, "str", node1, "data")
 Blueprint.connect(node1, "nodes", node2, "nodes")
 Blueprint.connect(node2, "nodes", node3, "items")

@@ -12,5 +12,5 @@ node2.query_param("key").value = 159
 
 _editor.add_node(node2, 120.85649891315, 145.46056345905)
 
-Blueprint.connect(node0, "str", node1, "str")
+Blueprint.connect(node0, "str", node1, "data")
 Blueprint.connect(node1, "nodes", node2, "nodes")

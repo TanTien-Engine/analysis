@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Variant.h"
+
 #include <string>
 #include <vector>
 #include <memory>
@@ -7,26 +9,6 @@
 
 namespace loggraph
 {
-
-enum class VarType
-{
-	Invalid = 0,
-
-	Integer,
-	Double,
-	String,
-};
-
-struct Variant
-{
-	VarType type;
-	union
-	{
-		int64_t i;
-		double  d;
-		const void* obj;
-	};
-};
 
 class Node
 {

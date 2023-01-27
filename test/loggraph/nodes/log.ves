@@ -1,0 +1,21 @@
+var node0 = ::loggraph::nodes::file::File()
+node0.query_param("filepath").value = "../assets/log0.txt"
+
+_editor.add_node(node0, -212, 177)
+
+var node1 = ::loggraph::nodes::parse::Parse()
+
+_editor.add_node(node1, -45, 155.58829190753)
+
+var node2 = ::loggraph::nodes::histogram::Histogram()
+
+_editor.add_node(node2, 126.03262941553, 156.67274341668)
+
+var node3 = ::loggraph::nodes::file::File()
+node3.query_param("filepath").value = "../assets/proto.txt"
+
+_editor.add_node(node3, -213.12272727273, 123.10454545455)
+
+Blueprint.connect(node0, "str", node1, "data")
+Blueprint.connect(node3, "str", node1, "proto")
+Blueprint.connect(node1, "nodes", node2, "nodes")

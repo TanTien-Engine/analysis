@@ -11,5 +11,5 @@ var node2 = ::loggraph::nodes::histogram::Histogram()
 
 _editor.add_node(node2, 126.03262941553, 156.67274341668)
 
-Blueprint.connect(node0, "str", node1, "str")
+Blueprint.connect(node0, "str", node1, "data")
 Blueprint.connect(node1, "nodes", node2, "nodes")

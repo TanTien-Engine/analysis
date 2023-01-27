@@ -208,9 +208,10 @@ void w_LogGraph_rm_dup()
 
 void w_LogGraph_parse()
 {
-    const char* str = ves_tostring(1);
+    const char* data = ves_tostring(1);
+    const char* proto = ves_tostring(2);
 
-    loggraph::LogParser parser(str);
+    loggraph::LogParser parser(data, proto);
     parser.Parse();
     auto& nodes = parser.GetNodes();
 
@@ -391,7 +392,7 @@ VesselForeignMethodFn LogGraphBindMethod(const char* signature)
     if (strcmp(signature, "static LogGraph.split(_)") == 0) return w_LogGraph_split;
     if (strcmp(signature, "static LogGraph.sort(_)") == 0) return w_LogGraph_sort;
     if (strcmp(signature, "static LogGraph.rm_dup(_)") == 0) return w_LogGraph_rm_dup;
-    if (strcmp(signature, "static LogGraph.parse(_)") == 0) return w_LogGraph_parse;
+    if (strcmp(signature, "static LogGraph.parse(_,_)") == 0) return w_LogGraph_parse;
 
     if (strcmp(signature, "static LogGraph.traceback(_)") == 0) return w_LogGraph_traceback;
     if (strcmp(signature, "static LogGraph.unique(_)") == 0) return w_LogGraph_unique;

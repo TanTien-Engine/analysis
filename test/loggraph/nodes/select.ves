@@ -25,7 +25,7 @@ node5.query_param("str").value = "test002"
 
 _editor.add_node(node5, -31, 43.5)
 
-Blueprint.connect(node0, "str", node1, "str")
+Blueprint.connect(node0, "str", node1, "data")
 Blueprint.connect(node1, "nodes", node3, "nodes")
 Blueprint.connect(node4, "str", node3, "needs")
 Blueprint.connect(node5, "str", node3, "excepts")

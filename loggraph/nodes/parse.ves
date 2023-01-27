@@ -12,7 +12,8 @@ class Parse is Node
 		super.init()
 
 		this.imports = [
-			Pin(this, "str", VAR_TYPE_STRING)
+			Pin(this, "data",  VAR_TYPE_STRING),
+			Pin(this, "proto", VAR_TYPE_STRING)
 		]
 		this.exports = [
 			Pin(this, "nodes", VAR_TYPE_ARRAY)
@@ -32,12 +33,18 @@ class Parse is Node
 
 	calc_value(idx)
 	{
-		var v_str = Blueprint.calc_input_value(this, 0)
-		if (!v_str) {
+		var v_data = Blueprint.calc_input_value(this, 0)
+		if (!v_data) {
 			return nil
 		}
 
-		var nodes = LogGraph.parse(v_str.value)
+		var proto = nil
+		var v_proto = Blueprint.calc_input_value(this, 1)
+		if (v_proto) {
+			proto = v_proto.value
+		}
+
+		var nodes = LogGraph.parse(v_data.value, proto)
 		this.v_nodes = []
 		for (var n in nodes) {
 			this.v_nodes.add(Variant(VAR_TYPE_NODE, n))

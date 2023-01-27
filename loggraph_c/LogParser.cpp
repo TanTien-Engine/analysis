@@ -1,4 +1,5 @@
 #include "LogParser.h"
+#include "ProtoParser.h"
 #include "Node.h"
 
 #include <lexer/Exception.h>
@@ -106,9 +107,15 @@ const std::string& LogTokenizer::NumberDelim()
 // class LogParser
 //////////////////////////////////////////////////////////////////////////
 
-LogParser::LogParser(const char* str)
-	: m_tokenizer(LogTokenizer(str))
+LogParser::LogParser(const char* data, const char* proto)
+	: m_tokenizer(LogTokenizer(data))
 {
+    if (proto) 
+    {
+        ProtoParser pp(proto);
+        pp.Parse();
+        m_messages = pp.GetMessages();
+    }
 }
 
 void LogParser::Parse()

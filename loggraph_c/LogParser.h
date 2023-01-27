@@ -6,6 +6,7 @@
 namespace loggraph
 {
 
+struct Message;
 class Node;
 
 namespace LogToken
@@ -41,7 +42,7 @@ private:
 class LogParser : public lexer::Parser<LogToken::Type>
 {
 public:
-	LogParser(const char* str);
+	LogParser(const char* data, const char* proto);
 
 	void Parse();
 	
@@ -54,6 +55,8 @@ private:
 
 private:
 	LogTokenizer m_tokenizer;
+
+	std::vector<std::shared_ptr<Message>> m_messages;
 
 	std::vector<std::shared_ptr<Node>> m_nodes;
 	std::vector<std::shared_ptr<Node>> m_curr_nodes;

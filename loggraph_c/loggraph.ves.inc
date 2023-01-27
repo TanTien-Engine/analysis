@@ -34,7 +34,7 @@ foreign class LogGraph
 	foreign static sort(items)
 	foreign static rm_dup(items)
 
-	foreign static parse(str)
+	foreign static parse(data, proto)
 
 	foreign static traceback(nodes)
 	foreign static unique(nodes)
