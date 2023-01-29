@@ -16,6 +16,8 @@ public:
 	Node() {}
 	Node(const std::string& type, const std::string& name);
 
+	~Node();
+
 	auto& GetType() const { return m_type; }
 	auto& GetName() const { return m_name; }
 
@@ -23,10 +25,7 @@ public:
 	auto& GetAllData() const { return m_data; }
 
 	void AddChild(const std::shared_ptr<Node>& c);
-
-	void AddData(int i);
-	void AddData(double d);
-	void AddData(const std::string& s);
+	void AddData(const Variant& var);
 
 private:
 	std::string m_type;
@@ -35,8 +34,6 @@ private:
 	std::vector<std::shared_ptr<Node>> m_children;
 
 	std::vector<Variant> m_data;
-
-	static std::set<std::string> m_strings;
 
 }; // Node
 

@@ -115,6 +115,7 @@ LogParser::LogParser(const char* data, const char* proto)
         ProtoParser pp(proto);
         pp.Parse();
         m_messages = pp.GetMessages();
+        m_label_binds = pp.GetLabelBinds();
     }
 }
 
@@ -190,7 +191,43 @@ void LogParser::ParseNode()
         case LogToken::String:
         {
             assert(!m_curr_nodes.empty());
-            m_curr_nodes.back()->AddData(token.Data());
+
+            auto str = token.Data();
+            auto itr = m_label_binds.find(str);
+            if (itr != m_label_binds.end())
+            {
+                auto& src = itr->second->items;
+                auto dst = new VarGroup;
+                for (int i = 0, n = src.size(); i < n; ++i)
+                {
+                    dst->names.push_back(src[i].name);
+
+                    switch (src[i].type)
+                    {
+                    case VarType::Integer:
+                        dst->children.push_back(Variant(token.ToInteger<int>()));
+                        token = m_tokenizer.NextToken();
+                        break;
+                    case VarType::Double:
+                        dst->children.push_back(Variant(token.ToFloat<double>()));
+                        token = m_tokenizer.NextToken();
+                        break;
+                    case VarType::String:
+                        dst->children.push_back(Variant(token.Data()));
+                        token = m_tokenizer.NextToken();
+                        break;
+                    default:
+                        assert(0);
+                    }
+                }
+
+                m_curr_nodes.back()->AddData(dst);
+            }
+            else
+            {
+                m_curr_nodes.back()->AddData(str);
+            }
+
             token = m_tokenizer.NextToken();
         }
             break;

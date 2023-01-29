@@ -56,7 +56,9 @@ private:
 private:
 	LogTokenizer m_tokenizer;
 
+	// proto
 	std::vector<std::shared_ptr<Message>> m_messages;
+	std::map<std::string, std::shared_ptr<Message>> m_label_binds;
 
 	std::vector<std::shared_ptr<Node>> m_nodes;
 	std::vector<std::shared_ptr<Node>> m_curr_nodes;

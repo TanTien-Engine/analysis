@@ -80,6 +80,8 @@ lexer::Tokenizer<ProtoToken::Type>::Token ProtoTokenizer::EmitToken()
                 ProtoToken::Type str_type;
                 if (strncmp(c, "message", e - c) == 0) {
                     str_type = ProtoToken::Message;
+                } else if (strncmp(c, "bind", e - c) == 0) {
+                    str_type = ProtoToken::Bind;
                 } else {
                     str_type = ProtoToken::String;
                 }
@@ -157,11 +159,10 @@ void ProtoParser::ParseMessage()
                     item.type = VarType::String;
                 } else {
                     item.type = VarType::Invalid;
-                    for (auto& msg : m_messages) {
-                        if (msg->name == type) {
-                            item.type = VarType::Struct;
-                            item.base = msg;
-                        }
+                    auto msg = QueryMessage(type);
+                    if (msg) {
+                        item.type = VarType::Group;
+                        item.base = msg;
                     }
                 }
 
@@ -177,6 +178,24 @@ void ProtoParser::ParseMessage()
             token = m_tokenizer.NextToken();
         }
             break;
+        case ProtoToken::Bind:
+        {
+            m_tokenizer.NextToken();
+
+            token = m_tokenizer.NextToken();
+            Expect(ProtoToken::String, token);
+            std::string label = token.Data();
+
+            token = m_tokenizer.NextToken();
+            Expect(ProtoToken::String, token);
+            std::string msg_name = token.Data();
+
+            auto msg = QueryMessage(msg_name);
+            if (msg) {
+                m_label_binds.insert({ label, msg });
+            }
+        }
+            break;
 		default:
         {
             Expect(ProtoToken::Comment, token);
@@ -186,6 +205,17 @@ void ProtoParser::ParseMessage()
 
 		token = m_tokenizer.PeekToken();
 	}
+}
+
+std::shared_ptr<Message> 
+ProtoParser::QueryMessage(const std::string& name) const
+{
+    for (auto& msg : m_messages) {
+        if (msg->name == name) {
+            return msg;
+        }
+    }
+    return nullptr;
 }
 
 std::map<ProtoToken::Type, std::string> 

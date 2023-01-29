@@ -2,11 +2,13 @@ message Point {
 	double x
 	double y
 	double z
-	string label
+	//string label
 }
 
 message Line {
 	Point start
 	Point end
-	string label
+	//string label
 }
+
+bind set_pos Point

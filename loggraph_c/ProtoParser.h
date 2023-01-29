@@ -16,7 +16,7 @@ struct Message
 {
 	struct Item
 	{
-		VarType  type;
+		VarType type;
 		std::shared_ptr<Message> base = nullptr;
 
 		std::string name;
@@ -35,11 +35,12 @@ namespace ProtoToken
 	static const Type Decimal       = 1 <<  1; // decimal number
 	static const Type String        = 1 <<  2; // string
 	static const Type Message       = 1 <<  3; // message
-	static const Type OBrace        = 1 <<  4; // opening brace: {
-	static const Type CBrace        = 1 <<  5; // closing brace: }
-	static const Type Comment       = 1 <<  6; // line comment starting with ///
-	static const Type Eof           = 1 <<  7; // end of file
-	static const Type Eol           = 1 <<  8; // end of line
+	static const Type Bind          = 1 <<  4; // bind
+	static const Type OBrace        = 1 <<  8; // opening brace: {
+	static const Type CBrace        = 1 <<  9; // closing brace: }
+	static const Type Comment       = 1 << 10; // line comment starting with ///
+	static const Type Eof           = 1 << 11; // end of file
+	static const Type Eol           = 1 << 12; // end of line
 }
 
 class ProtoTokenizer : public lexer::Tokenizer<ProtoToken::Type>
@@ -67,9 +68,12 @@ public:
 	void Parse();
 	
 	auto& GetMessages() const { return m_messages; }
+	auto& GetLabelBinds() const { return m_label_binds; }
 
 private:
 	void ParseMessage();
+
+	std::shared_ptr<Message> QueryMessage(const std::string& name) const;
 
 	virtual std::map<ProtoToken::Type, std::string> TokenNames() const override;
 
@@ -77,6 +81,7 @@ private:
 	ProtoTokenizer m_tokenizer;
 
 	std::vector<std::shared_ptr<Message>> m_messages;
+	std::map<std::string, std::shared_ptr<Message>> m_label_binds;
 
 	typedef ProtoTokenizer::Token Token;
 
