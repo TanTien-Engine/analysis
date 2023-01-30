@@ -9,7 +9,7 @@ foreign class Node
 	foreign get_name()
 
 	foreign get_children()
-	foreign get_items()
+	foreign get_data()
 
 	foreign has_item(item)
 

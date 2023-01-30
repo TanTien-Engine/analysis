@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Variant.h"
+
 #include <lexer/Tokenizer.h>
 #include <lexer/Parser.h>
 
@@ -50,6 +52,8 @@ public:
 
 private:
 	void ParseNode();
+
+	Variant ParseMessage(const Message& msg, LogTokenizer::Token& token);
 
 	virtual std::map<LogToken::Type, std::string> TokenNames() const override;
 

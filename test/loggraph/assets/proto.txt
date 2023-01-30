@@ -12,3 +12,4 @@ message Line {
 }
 
 bind set_pos Point
+bind set_line Line

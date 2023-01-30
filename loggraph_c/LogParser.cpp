@@ -194,37 +194,9 @@ void LogParser::ParseNode()
 
             auto str = token.Data();
             auto itr = m_label_binds.find(str);
-            if (itr != m_label_binds.end())
-            {
-                auto& src = itr->second->items;
-                auto dst = new VarGroup;
-                for (int i = 0, n = src.size(); i < n; ++i)
-                {
-                    dst->names.push_back(src[i].name);
-
-                    switch (src[i].type)
-                    {
-                    case VarType::Integer:
-                        dst->children.push_back(Variant(token.ToInteger<int>()));
-                        token = m_tokenizer.NextToken();
-                        break;
-                    case VarType::Double:
-                        dst->children.push_back(Variant(token.ToFloat<double>()));
-                        token = m_tokenizer.NextToken();
-                        break;
-                    case VarType::String:
-                        dst->children.push_back(Variant(token.Data()));
-                        token = m_tokenizer.NextToken();
-                        break;
-                    default:
-                        assert(0);
-                    }
-                }
-
-                m_curr_nodes.back()->AddData(dst);
-            }
-            else
-            {
+            if (itr != m_label_binds.end()) {
+                m_curr_nodes.back()->AddData(ParseMessage(*itr->second, token));                
+            } else {
                 m_curr_nodes.back()->AddData(str);
             }
 
@@ -241,6 +213,40 @@ void LogParser::ParseNode()
 		token = m_tokenizer.PeekToken();
 	}
     assert(m_curr_nodes.empty());
+}
+
+Variant LogParser::ParseMessage(const Message& msg, Token& token)
+{
+    auto& src = msg.items;
+    auto dst = new VarGroup;
+    for (size_t i = 0, n = src.size(); i < n; ++i)
+    {
+        dst->names.push_back(src[i].name);
+
+        switch (src[i].type)
+        {
+        case VarType::Integer:
+            dst->children.push_back(Variant(token.ToInteger<int>()));
+            token = m_tokenizer.NextToken();
+            break;
+        case VarType::Double:
+            dst->children.push_back(Variant(token.ToFloat<double>()));
+            token = m_tokenizer.NextToken();
+            break;
+        case VarType::String:
+            dst->children.push_back(Variant(token.Data()));
+            token = m_tokenizer.NextToken();
+            break;
+        case VarType::Group:
+            assert(src[i].base);
+            dst->children.push_back(ParseMessage(*src[i].base, token));
+            break;
+        default:
+            assert(0);
+        }
+    }
+
+    return dst;
 }
 
 std::map<LogToken::Type, std::string> 
