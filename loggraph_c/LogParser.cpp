@@ -195,7 +195,7 @@ void LogParser::ParseNode()
             auto str = token.Data();
             auto itr = m_label_binds.find(str);
             if (itr != m_label_binds.end()) {
-                m_curr_nodes.back()->AddData(ParseMessage(*itr->second, token));                
+                m_curr_nodes.back()->AddData(ParseMessage(*itr->second, token));
             } else {
                 m_curr_nodes.back()->AddData(str);
             }
@@ -218,28 +218,28 @@ void LogParser::ParseNode()
 Variant LogParser::ParseMessage(const Message& msg, Token& token)
 {
     auto& src = msg.items;
-    auto dst = new VarGroup;
+    VarGroup dst;
     for (size_t i = 0, n = src.size(); i < n; ++i)
     {
-        dst->names.push_back(src[i].name);
+        dst.names.push_back(src[i].name);
 
         switch (src[i].type)
         {
         case VarType::Integer:
-            dst->children.push_back(Variant(token.ToInteger<int>()));
+            dst.children.push_back(Variant(token.ToInteger<int>()));
             token = m_tokenizer.NextToken();
             break;
         case VarType::Double:
-            dst->children.push_back(Variant(token.ToFloat<double>()));
+            dst.children.push_back(Variant(token.ToFloat<double>()));
             token = m_tokenizer.NextToken();
             break;
         case VarType::String:
-            dst->children.push_back(Variant(token.Data()));
+            dst.children.push_back(Variant(token.Data()));
             token = m_tokenizer.NextToken();
             break;
         case VarType::Group:
             assert(src[i].base);
-            dst->children.push_back(ParseMessage(*src[i].base, token));
+            dst.children.push_back(ParseMessage(*src[i].base, token));
             break;
         default:
             assert(0);

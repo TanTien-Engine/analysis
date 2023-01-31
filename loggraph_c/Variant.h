@@ -27,7 +27,11 @@ struct Variant
 	Variant(int i);
 	Variant(double d);
 	Variant(const std::string& s);
-	Variant(const VarGroup* group);
+	Variant(const VarGroup& group);
+
+	Variant(const Variant& var);
+	Variant& operator = (const Variant& var);
+
 	~Variant();
 
 	VarType type;

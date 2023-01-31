@@ -16,8 +16,6 @@ public:
 	Node() {}
 	Node(const std::string& type, const std::string& name);
 
-	~Node();
-
 	auto& GetType() const { return m_type; }
 	auto& GetName() const { return m_name; }
 
