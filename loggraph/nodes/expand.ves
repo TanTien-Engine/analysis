@@ -1,0 +1,116 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
+import "blueprint.blueprint" for Blueprint
+import "loggraph.variant" for VAR_TYPE_NODE, VAR_TYPE_VARIANT
+
+class Expand is Node
+{
+	init() 
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "data", [ VAR_TYPE_ARRAY, VAR_TYPE_NODE, VAR_TYPE_VARIANT ]),
+		]
+
+		this.layout()
+
+		this.export_values = []
+
+		this.data_dirty = false
+	}
+
+	on_pin_dirty(pin)
+	{
+		super.on_pin_dirty(pin)
+
+		this.data_dirty = true
+	}
+
+	calc_value(idx)
+	{
+		if (this.data_dirty) 
+		{
+			this.export_values = this.calc_export_values()
+			this.data_dirty = false
+		}
+		return this.export_values[idx]
+	}
+
+
+	on_connected(pin)
+	{
+		if (pin.is_input) {
+			this.setup_data()
+		}
+	}
+
+	on_disconnected(pin)
+	{
+		if (pin.is_input) {
+			this.setup_data()
+		}
+	}
+
+	setup_data()
+	{
+		for (var p in this.exports) {
+			while (!p.conns.isEmpty) {
+				Blueprint.disconnect(p.conns.front())
+			}
+		}
+
+		this.export_values = this.calc_export_values()
+
+		this.exports.clear()
+		for (var v in this.export_values) {
+			this.exports.add(Pin(this, v.value.get_name(), v.type))
+		}
+		this.layout()
+	}
+
+	calc_export_values()
+	{
+		var export_values = []
+
+		var data = Blueprint.calc_input_value(this, 0)
+		if (!data) {
+			return export_values
+		}
+
+		var idx = 0
+		if (data.type == VAR_TYPE_ARRAY)
+		{
+			for (var i in 0..data.value.count) {
+				export_values.add(Variant(data.value[i]))
+			}
+		}
+		else if (data.type == VAR_TYPE_NODE)
+		{
+			var children = data.value.get_children()
+			if (!children.isEmpty)
+			{
+				for (var child in children) {
+					export_values.add(Variant(VAR_TYPE_NODE, child))
+				}
+			}
+			else
+			{
+				var items = data.value.get_data()
+				for (var item in items) {
+					export_values.add(Variant(VAR_TYPE_VARIANT, item))
+				}
+			}
+		}
+		else if (data.type == VAR_TYPE_VARIANT)
+		{
+			var children = data.value.get_children()
+			for (var child in children) {
+				export_values.add(Variant(VAR_TYPE_VARIANT, child))
+			}
+		}
+
+		return export_values
+	}
+}

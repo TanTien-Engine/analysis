@@ -7,15 +7,34 @@ var node1 = ::loggraph::nodes::parse::Parse()
 
 _editor.add_node(node1, -45, 155.58829190753)
 
-var node2 = ::loggraph::nodes::histogram::Histogram()
+var node2 = ::loggraph::nodes::file::File()
+node2.query_param("filepath").value = "../assets/proto.txt"
 
-_editor.add_node(node2, 126.03262941553, 156.67274341668)
+_editor.add_node(node2, -213.12272727273, 123.10454545455)
 
-var node3 = ::loggraph::nodes::file::File()
-node3.query_param("filepath").value = "../assets/proto.txt"
+var node3 = ::loggraph::nodes::expand::Expand()
 
-_editor.add_node(node3, -213.12272727273, 123.10454545455)
+_editor.add_node(node3, 107, 145)
+
+var node4 = ::loggraph::nodes::expand::Expand()
+
+_editor.add_node(node4, 250, 193)
+
+var node5 = ::loggraph::nodes::expand::Expand()
+
+_editor.add_node(node5, 253, 135)
+
+var node6 = ::loggraph::nodes::expand::Expand()
+
+_editor.add_node(node6, 255, 75)
+
+var node7 = ::loggraph::nodes::print::Print()
+
+_editor.add_node(node7, -52, 240)
 
 Blueprint.connect(node0, "str", node1, "data")
-Blueprint.connect(node3, "str", node1, "proto")
-Blueprint.connect(node1, "nodes", node2, "nodes")
+Blueprint.connect(node2, "str", node1, "proto")
+Blueprint.connect(node1, "nodes", node3, "data")
+Blueprint.connect(node3, "ftr2", node6, "data")
+Blueprint.connect(node3, "ftr1", node5, "data")
+Blueprint.connect(node3, "ftr0", node4, "data")

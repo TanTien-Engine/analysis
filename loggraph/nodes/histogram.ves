@@ -38,7 +38,7 @@ class Histogram is Node
 			var y = 0
 
 			var w = 50
-			var h = node.get_items().count
+			var h = node.get_data().count
 
 			pt.add_rect_filled(nil, [x - w * 0.5, y + 20, w, h], COL_PANEL_BG)
 

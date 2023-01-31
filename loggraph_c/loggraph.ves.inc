@@ -21,6 +21,15 @@ foreign class Node
 	}
 }
 
+foreign class Variant
+{
+	init() {}
+
+	foreign get_name()
+
+	foreign get_children()
+}
+
 foreign class Traceback
 {
 	init() {}

@@ -48,8 +48,8 @@ private:
 
 struct VarGroup
 {
-	std::vector<Variant> children;
-	std::vector<std::string> names;
+	std::string name;
+	std::vector<std::pair<std::string, Variant>> children;
 };
 
 }

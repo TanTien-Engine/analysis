@@ -66,17 +66,25 @@ void w_Node_get_children()
     }
 }
 
-void w_Node_get_items()
+void w_Node_get_data()
 {
     auto node = ((tt::Proxy<loggraph::Node>*)ves_toforeign(0))->obj;
 
-    std::vector<int> items;
-    for (auto& var : node->GetAllData()) {
-        if (var.type == loggraph::VarType::Integer) {
-            items.push_back(var.i);
-        }
+    ves_pop(ves_argnum());
+
+    auto& data = node->GetAllData();
+    const int num = (int)(data.size());
+    ves_newlist(num);
+    for (int i = 0; i < num; ++i)
+    {
+        ves_pushnil();
+        ves_import_class("loggraph", "Variant");
+        auto var = (loggraph::Variant*)ves_set_newforeign(1, 2, sizeof(loggraph::Variant));
+        *var = data[i];
+        ves_pop(1);
+        ves_seti(-2, i);
+        ves_pop(1);
     }
-    tt::return_list(items);
 }
 
 void w_Node_has_item()
@@ -94,6 +102,69 @@ void w_Node_has_item()
     }
 
     ves_set_boolean(0, find);
+}
+
+void w_Variant_allocate()
+{
+    loggraph::Variant* var = (loggraph::Variant*)ves_set_newforeign(0, 0, sizeof(loggraph::Variant));
+    *var = loggraph::Variant();
+}
+
+int w_Variant_finalize(void* data)
+{
+    return sizeof(loggraph::Variant);
+}
+
+void w_Variant_get_name()
+{
+    auto var = (loggraph::Variant*)ves_toforeign(0);
+    std::string name = "unknown";
+    switch (var->type)
+    {
+    case loggraph::VarType::Integer:
+        name = std::to_string(var->i);
+        break;
+    case loggraph::VarType::Double:
+        name = std::to_string(var->d);
+        break;
+    case loggraph::VarType::String:
+        name = (const char*)var->obj;
+        break;
+    case loggraph::VarType::Group:
+        name = ((const loggraph::VarGroup*)var->obj)->name;
+        break;
+    default:
+        assert(0);
+    }
+    ves_set_lstring(0, name.c_str(), name.size());
+}
+
+void w_Variant_get_children()
+{
+    auto var = (loggraph::Variant*)ves_toforeign(0);
+
+    ves_pop(ves_argnum());
+
+    if (var->type != loggraph::VarType::Group) {
+        ves_newlist(0);
+        return;
+    }
+
+    assert(var->obj);
+    auto group = reinterpret_cast<const loggraph::VarGroup*>(var->obj);
+    auto& children = group->children;
+    const int num = (int)(children.size());
+    ves_newlist(num);
+    for (int i = 0; i < num; ++i)
+    {
+        ves_pushnil();
+        ves_import_class("loggraph", "Variant");
+        loggraph::Variant* var = (loggraph::Variant*)ves_set_newforeign(1, 2, sizeof(loggraph::Variant));
+        *var = children[i].second;
+        ves_pop(1);
+        ves_seti(-2, i);
+        ves_pop(1);
+    }
 }
 
 void w_Traceback_print()
@@ -384,8 +455,11 @@ VesselForeignMethodFn LogGraphBindMethod(const char* signature)
     if (strcmp(signature, "Node.get_type()") == 0) return w_Node_get_type;
     if (strcmp(signature, "Node.get_name()") == 0) return w_Node_get_name;
     if (strcmp(signature, "Node.get_children()") == 0) return w_Node_get_children;
-    if (strcmp(signature, "Node.get_items()") == 0) return w_Node_get_items;
+    if (strcmp(signature, "Node.get_data()") == 0) return w_Node_get_data;
     if (strcmp(signature, "Node.has_item(_)") == 0) return w_Node_has_item;
+
+    if (strcmp(signature, "Variant.get_name()") == 0) return w_Variant_get_name;
+    if (strcmp(signature, "Variant.get_children()") == 0) return w_Variant_get_children;
 
     if (strcmp(signature, "Traceback.print()") == 0) return w_Traceback_print;
 
@@ -411,6 +485,13 @@ void LogGraphBindClass(const char* class_name, VesselForeignClassMethods* method
     {
         methods->allocate = w_Node_allocate;
         methods->finalize = w_Node_finalize;
+        return;
+    }
+
+    if (strcmp(class_name, "Variant") == 0)
+    {
+        methods->allocate = w_Variant_allocate;
+        methods->finalize = w_Variant_finalize;
         return;
     }
 }
