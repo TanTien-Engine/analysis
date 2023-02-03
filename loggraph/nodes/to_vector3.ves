@@ -1,0 +1,41 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant, VAR_TYPE_NUMBER3
+import "blueprint.blueprint" for Blueprint
+import "loggraph.variant" for VAR_TYPE_VARIANT
+import "maths.vector" for Vector3
+
+class ToVector3 is Node
+{
+	init() 
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "var", VAR_TYPE_VARIANT),
+		]
+		this.exports = [
+			Pin(this, "vec3", VAR_TYPE_NUMBER3),
+		]
+
+		this.layout()
+	}
+
+	calc_value(idx) 
+	{
+		var v_var = Blueprint.calc_input_value(this, 0)
+		if (!v_var) {
+			return nil
+		}
+
+		var children = v_var.value.get_children()
+		if (children.count != 3) {
+			return nil
+		}
+
+		var x = children[0].to_number()
+		var y = children[1].to_number()
+		var z = children[2].to_number()
+		return Variant(VAR_TYPE_NUMBER3, Vector3(x, y, z))
+	}
+}

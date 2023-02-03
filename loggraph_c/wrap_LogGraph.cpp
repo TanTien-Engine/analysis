@@ -115,6 +115,28 @@ int w_Variant_finalize(void* data)
     return sizeof(loggraph::Variant);
 }
 
+void w_Variant_get_type()
+{
+    auto var = (loggraph::Variant*)ves_toforeign(0);
+    std::string type = "unknown";
+    switch (var->type)
+    {
+    case loggraph::VarType::Integer:
+    case loggraph::VarType::Double:
+        type = "number";
+        break;
+    case loggraph::VarType::String:
+        type = "string";
+        break;
+    case loggraph::VarType::Group:
+        type = "struct";
+        break;
+    default:
+        assert(0);
+    }
+    ves_set_lstring(0, type.c_str(), type.size());
+}
+
 void w_Variant_get_name()
 {
     auto var = (loggraph::Variant*)ves_toforeign(0);
@@ -137,6 +159,27 @@ void w_Variant_get_name()
         assert(0);
     }
     ves_set_lstring(0, name.c_str(), name.size());
+}
+
+void w_Variant_to_number()
+{
+    auto var = (loggraph::Variant*)ves_toforeign(0);
+    double num = 0;
+    switch (var->type)
+    {
+    case loggraph::VarType::Integer:
+        num = var->i;
+        break;
+    case loggraph::VarType::Double:
+        num = var->d;
+        break;
+    //default:
+    //{
+    //    ves_set_nil(0);
+    //    return;
+    //}
+    }
+    ves_set_number(0, num);
 }
 
 void w_Variant_get_children()
@@ -458,7 +501,9 @@ VesselForeignMethodFn LogGraphBindMethod(const char* signature)
     if (strcmp(signature, "Node.get_data()") == 0) return w_Node_get_data;
     if (strcmp(signature, "Node.has_item(_)") == 0) return w_Node_has_item;
 
+    if (strcmp(signature, "Variant.get_type()") == 0) return w_Variant_get_type;
     if (strcmp(signature, "Variant.get_name()") == 0) return w_Variant_get_name;
+    if (strcmp(signature, "Variant.to_number()") == 0) return w_Variant_to_number;
     if (strcmp(signature, "Variant.get_children()") == 0) return w_Variant_get_children;
 
     if (strcmp(signature, "Traceback.print()") == 0) return w_Traceback_print;

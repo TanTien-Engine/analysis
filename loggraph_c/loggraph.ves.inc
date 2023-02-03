@@ -25,7 +25,10 @@ foreign class Variant
 {
 	init() {}
 
+	foreign get_type()
 	foreign get_name()
+
+	foreign to_number()
 
 	foreign get_children()
 }

@@ -13,6 +13,14 @@ class Logeditor is Editor
 	{
 		this.clear_popup_nodes()
 
+		import "blueprint.nodes.camera3d" for Camera3d
+		super.add_popup_node(Camera3d)
+
+		import "geograph.nodes.line3d" for Line3d
+		super.add_popup_node(Line3d)
+		import "geograph.nodes.draw_geometry" for DrawGeometry
+		super.add_popup_node(DrawGeometry)
+
 		import "lognodes" for LOG_NODES
 		for (var node in LOG_NODES) {
 			super.add_popup_node(node)

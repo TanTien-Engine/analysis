@@ -32,9 +32,45 @@ var node7 = ::loggraph::nodes::print::Print()
 
 _editor.add_node(node7, -52, 240)
 
+var node8 = ::geograph::nodes::line3d::Line3d()
+node8.query_param("p0").value.set(0, 0, 0)
+node8.query_param("p1").value.set(333.33334350586, 244.44444274902, 300)
+
+_editor.add_node(node8, -225, -111)
+
+var node9 = ::geograph::nodes::draw_geometry::DrawGeometry()
+node9.query_param("skip").value = false
+
+_editor.add_node(node9, 139, -146)
+
+var node10 = ::blueprint::nodes::camera3d::Camera3d()
+
+node10.cam.position.set(0.71505783155356, 0.015503094271016, 2.3118160015045)
+node10.cam.yaw = -112.9
+node10.cam.pitch = -0.9
+node10.cam.zoom = 45
+node10.cam.update_vectors()
+node10.speed = 0.01
+
+_editor.add_node(node10, -58, -245)
+
+var node11 = ::loggraph::nodes::to_vector3::ToVector3()
+
+_editor.add_node(node11, 393, 151)
+
+var node12 = ::loggraph::nodes::to_vector3::ToVector3()
+
+_editor.add_node(node12, 407, 96)
+
 Blueprint.connect(node0, "str", node1, "data")
 Blueprint.connect(node2, "str", node1, "proto")
 Blueprint.connect(node1, "nodes", node3, "data")
 Blueprint.connect(node3, "ftr2", node6, "data")
 Blueprint.connect(node3, "ftr1", node5, "data")
+Blueprint.connect(node5, "Point", node12, "var")
+Blueprint.connect(node5, "Point", node11, "var")
+Blueprint.connect(node11, "vec3", node8, "p0")
+Blueprint.connect(node12, "vec3", node8, "p1")
+Blueprint.connect(node8, "geo", node9, "geos")
+Blueprint.connect(node10, "mat", node9, "cam_mat")
 Blueprint.connect(node3, "ftr0", node4, "data")

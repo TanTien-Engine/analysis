@@ -5,4 +5,5 @@ File, Split, Sort, RmDup, Parse,
 Print, Histogram, Find, Traceback, Unique, Select, String,
 Diff, RegexReplace,
 Expand,
+ToVector3,
 ]
