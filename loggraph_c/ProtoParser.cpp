@@ -151,6 +151,15 @@ void ProtoParser::ParseMessage()
                 token = m_tokenizer.NextToken();
                 Expect(ProtoToken::String, token);
                 std::string type = token.Data();
+                if (type == "repeated")
+                {
+                    item.repeat = true;
+
+                    token = m_tokenizer.NextToken();
+                    Expect(ProtoToken::String, token);
+                    type = token.Data();
+                }
+
                 if (type == "int") {
                     item.type = VarType::Integer;
                 } else if (type == "double") {
@@ -174,6 +183,8 @@ void ProtoParser::ParseMessage()
             }
 
             m_messages.push_back(msg);
+
+            m_label_binds.insert({ msg->name, msg });
 
             token = m_tokenizer.NextToken();
         }

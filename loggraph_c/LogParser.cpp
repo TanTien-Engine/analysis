@@ -228,29 +228,52 @@ Variant LogParser::ParseMessage(const Message& msg, Token& token)
         std::string name = src[i].name;
         Variant var;
 
-        switch (src[i].type)
+        if (src[i].repeat)
         {
-        case VarType::Integer:
-            token = m_tokenizer.NextToken();
-            var = token.ToInteger<int>();
-            break;
-        case VarType::Double:
-            token = m_tokenizer.NextToken();
-            var = token.ToFloat<double>();
-            break;
-        case VarType::String:
-            token = m_tokenizer.NextToken();
-            var = token.Data();
-            break;
-        case VarType::Group:
-            assert(src[i].base);
-            var = ParseMessage(*src[i].base, token);
-            break;
-        default:
-            assert(0);
+            if (src[i].type == VarType::Integer)
+            {
+                while (m_tokenizer.PeekToken().GetType() == (int)VarType::Integer && src[i].type == VarType::Integer)
+                {
+                    token = m_tokenizer.NextToken();
+                    var = token.ToInteger<int>();
+                    dst.children.push_back({ name, var });
+                }
+            }
+            else if (src[i].type == VarType::Double)
+            {
+                while (m_tokenizer.PeekToken().GetType() == (int)VarType::Double && src[i].type == VarType::Double)
+                {
+                    token = m_tokenizer.NextToken();
+                    var = token.ToFloat<double>();
+                    dst.children.push_back({ name, var });
+                }
+            }
         }
-
-        dst.children.push_back({ name, var });
+        else
+        {
+            switch (src[i].type)
+            {
+            case VarType::Integer:
+                token = m_tokenizer.NextToken();
+                var = token.ToInteger<int>();
+                break;
+            case VarType::Double:
+                token = m_tokenizer.NextToken();
+                var = token.ToFloat<double>();
+                break;
+            case VarType::String:
+                token = m_tokenizer.NextToken();
+                var = token.Data();
+                break;
+            case VarType::Group:
+                assert(src[i].base);
+                var = ParseMessage(*src[i].base, token);
+                break;
+            default:
+                assert(0);
+            }
+            dst.children.push_back({ name, var });
+        }
     }
 
     return dst;
