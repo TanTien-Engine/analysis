@@ -1,0 +1,9 @@
+message vert {
+	double x
+	double y
+	double z
+}
+
+message face {
+	repeated int idx
+}

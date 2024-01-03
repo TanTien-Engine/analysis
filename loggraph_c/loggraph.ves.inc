@@ -33,6 +33,11 @@ foreign class Variant
 	foreign get_children()
 }
 
+foreign class NodeAdapter
+{
+	foreign static to_polytope(node)
+}
+
 foreign class Traceback
 {
 	init() {}

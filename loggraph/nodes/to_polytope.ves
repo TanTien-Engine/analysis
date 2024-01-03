@@ -1,0 +1,57 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant, VAR_TYPE_NUMBER3
+import "blueprint.blueprint" for Blueprint
+import "geograph.variant" for VAR_TYPE_GEO, VarGeo
+import "geograph.brush" for Brush
+import "loggraph.variant" for VAR_TYPE_VARIANT
+import "maths.vector" for Vector3
+import "loggraph" for NodeAdapter
+
+class ToPolytope is Node
+{
+	init() 
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "var", VAR_TYPE_VARIANT),
+		]
+		this.exports = [
+			Pin(this, "geo", VAR_TYPE_GEO),
+		]
+
+		this.layout()
+
+		this.v_poly = nil
+	}
+
+	on_pin_dirty(pin)
+	{
+		super.on_pin_dirty(pin)
+
+		this.v_poly = nil
+	}
+
+	calc_value(idx)
+	{
+		if (!this.v_poly) {
+			this.v_poly = this.calc_value_impl()
+		}
+		return this.v_poly
+	}
+
+	calc_value_impl()
+	{
+		var v_var = Blueprint.calc_input_value(this, 0)
+		if (!v_var) {
+			return nil
+		}
+
+		var poly = NodeAdapter.to_polytope(v_var.value)
+
+		var geo = VarGeo()
+		geo.shape = Brush([ poly ])
+		return Variant(VAR_TYPE_GEO, geo)
+	}
+}

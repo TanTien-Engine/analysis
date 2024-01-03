@@ -4,6 +4,7 @@
 #include "Traceback.h"
 #include "Diff.h"
 #include "Regex.h"
+#include "NodeAdapter.h"
 #include "modules/script/TransHelper.h"
 
 #include <string>
@@ -208,6 +209,14 @@ void w_Variant_get_children()
         ves_seti(-2, i);
         ves_pop(1);
     }
+}
+
+void w_NodeAdapter_to_polytope()
+{
+    auto node = ((tt::Proxy<loggraph::Node>*)ves_toforeign(1))->obj;
+
+    auto poly = loggraph::NodeAdapter::ToPolytope(node);
+    tt::return_poly(poly);
 }
 
 void w_Traceback_print()
@@ -505,6 +514,8 @@ VesselForeignMethodFn LogGraphBindMethod(const char* signature)
     if (strcmp(signature, "Variant.get_name()") == 0) return w_Variant_get_name;
     if (strcmp(signature, "Variant.to_number()") == 0) return w_Variant_to_number;
     if (strcmp(signature, "Variant.get_children()") == 0) return w_Variant_get_children;
+
+    if (strcmp(signature, "static NodeAdapter.to_polytope(_)") == 0) return w_NodeAdapter_to_polytope;
 
     if (strcmp(signature, "Traceback.print()") == 0) return w_Traceback_print;
 
