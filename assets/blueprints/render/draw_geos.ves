@@ -1,0 +1,33 @@
+var node0 = ::blueprint::nodes::camera3d::Camera3d()
+
+node0.cam.position.set(2.8335515545035, 2.5503987317733, -3.2297997644009)
+node0.cam.yaw = -224.3
+node0.cam.pitch = -35.4
+node0.cam.zoom = 45
+node0.cam.update_vectors()
+node0.speed = 0.19565641880035
+
+_editor.add_node(node0, -235.03495879241, 11.139567738879)
+
+var node1 = ::blueprint::nodes::subgraph::Subgraph()
+node1.load_from_file(_editor, "../../../../../tantien/assets/blueprints/geograph/draw_geos_selected.ves")
+
+_editor.add_node(node1, 116.94866198313, 94.336793849211)
+
+var node2 = ::blueprint::nodes::input::Input()
+
+node2.var_name = "geos"
+node2.var_type = "array"
+
+_editor.add_node(node2, -88.654534632839, 132.23825298527)
+
+var node3 = ::blueprint::nodes::input::Input()
+
+node3.var_name = "selected"
+node3.var_type = "array"
+
+_editor.add_node(node3, -88.654516675047, 36.616323589015)
+
+Blueprint.connect(node2, "var", node1, "geos")
+Blueprint.connect(node0, "this", node1, "view_cam")
+Blueprint.connect(node3, "var", node1, "selected")

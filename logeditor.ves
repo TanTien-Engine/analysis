@@ -1,4 +1,8 @@
 import "editor.editor" for Editor
+import "editor.node_cache" for NODE_CACHE
+import "blueprint.nodes.array" for Array
+import "blueprint.blueprint" for Blueprint
+import "loggraph.nodes.to_polytope" for ToPolytope
 
 class Logeditor is Editor
 {
@@ -7,6 +11,17 @@ class Logeditor is Editor
 		super.load()
 
 		this.prepare_nodes()
+
+		this.all_geos = Array()
+		this.sel_geos = Array()
+
+		this.render_node = NODE_CACHE.fetch("../tt/analysis/assets/blueprints/render/draw_geos.ves", nil)
+		this.add_node(this.render_node, 0, 0)
+
+		Blueprint.connect(this.all_geos, "all", this.render_node, "geos")
+		Blueprint.connect(this.sel_geos, "all", this.render_node, "selected")
+
+		this.last_selected = nil
 	}
 
 	prepare_nodes()
@@ -15,6 +30,8 @@ class Logeditor is Editor
 
 		import "blueprint.nodes.camera3d" for Camera3d
 		super.add_popup_node(Camera3d)
+		import "blueprint.nodes.merge" for Merge
+		super.add_popup_node(Merge)
 
 		import "geograph.nodes.line3d" for Line3d
 		super.add_popup_node(Line3d)
@@ -25,5 +42,46 @@ class Logeditor is Editor
 		for (var node in LOG_NODES) {
 			super.add_popup_node(node)
 		}
+	}
+
+	draw_preview()
+	{
+		if (this.scene_stack.bp_dirty)
+		{
+			this.all_geos.list.clear()
+
+			var scene = this.scene_stack.root()
+			for (var node in scene.nodes) 
+			{
+				var bp_node = node.components["bp"]
+				if (bp_node is ToPolytope)
+				{
+					var v_geo = Blueprint.calc_output_value(bp_node, 0)
+					this.all_geos.list.add(v_geo)
+				}
+			}
+
+			Blueprint.send_pin_dirty_root(this.all_geos.exports[0], "")
+		}
+
+		var selected = this.preview_op.get_selected()
+		if (selected != this.last_selected)
+		{
+			this.sel_geos.list.clear()
+
+			if (selected is ToPolytope)
+			{
+				var v_geo = Blueprint.calc_output_value(selected, 0)
+				this.sel_geos.list.add(v_geo)
+			}
+
+			this.last_selected = selected
+
+			Blueprint.send_pin_dirty_root(this.sel_geos.exports[0], "")
+		}
+
+		super.draw_preview()
+
+		this.render_node.render_run()
 	}
 }

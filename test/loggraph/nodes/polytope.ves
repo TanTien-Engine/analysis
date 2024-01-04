@@ -1,59 +1,53 @@
-var node0 = ::loggraph::nodes::file::File()
-node0.query_param("filepath").value = "../assets/polytope.txt"
+var node0 = ::blueprint::nodes::subgraph::Subgraph()
+node0.load_from_file(_editor, "../../../assets/blueprints/render/draw_geos.ves")
 
-_editor.add_node(node0, -186, 189)
+node0.op_node.cam.position.set(2.8335515545035, 2.5503987317733, -3.2297997644009)
+node0.op_node.cam.yaw = -224.3
+node0.op_node.cam.pitch = -35.4
+node0.op_node.cam.zoom = 45
+node0.op_node.cam.update_vectors()
+node0.op_node.speed = 0.19565641880035
 
-var node1 = ::loggraph::nodes::parse::Parse()
+_editor.add_node(node0, 575, -123)
 
-_editor.add_node(node1, -27, 156.58829190753)
+var node1 = ::loggraph::nodes::file::File()
+node1.query_param("filepath").value = "../assets/polytope.txt"
 
-var node2 = ::loggraph::nodes::expand::Expand()
+_editor.add_node(node1, -186, 189)
 
-_editor.add_node(node2, 114, 169)
+var node2 = ::loggraph::nodes::parse::Parse()
+
+_editor.add_node(node2, -27, 156.58829190753)
 
 var node3 = ::loggraph::nodes::expand::Expand()
 
-_editor.add_node(node3, 262, 155)
+_editor.add_node(node3, 114, 169)
 
 var node4 = ::loggraph::nodes::expand::Expand()
 
-_editor.add_node(node4, 406.05, 118.31)
+_editor.add_node(node4, 265, 154)
 
-var node5 = ::loggraph::nodes::file::File()
-node5.query_param("filepath").value = "../assets/proto_polytope.txt"
+var node5 = ::loggraph::nodes::expand::Expand()
 
-_editor.add_node(node5, -181, 107)
+_editor.add_node(node5, 406.05, 118.31)
 
-var node6 = ::loggraph::nodes::to_polytope::ToPolytope()
+var node6 = ::loggraph::nodes::file::File()
+node6.query_param("filepath").value = "../assets/proto_polytope.txt"
 
-_editor.add_node(node6, 406.48, 180.69)
+_editor.add_node(node6, -181, 107)
 
-var node7 = ::blueprint::nodes::camera3d::Camera3d()
+var node7 = ::loggraph::nodes::to_polytope::ToPolytope()
 
-node7.cam.position.set(5.6338135098773, 2.2888963580073, -0.89055157421585)
-node7.cam.yaw = -173.4
-node7.cam.pitch = -19.7
-node7.cam.zoom = 45
-node7.cam.update_vectors()
-node7.speed = 0.19565641880035
+_editor.add_node(node7, 406.48, 180.69)
 
-_editor.add_node(node7, 415.60458360839, -72.36520572181)
+var node8 = ::loggraph::nodes::to_polytope::ToPolytope()
 
-var node8 = ::blueprint::nodes::subgraph::Subgraph()
-node8.load_from_file(_editor, "../../../../../tantien/assets/blueprints/geograph/draw_geos.ves")
+_editor.add_node(node8, 541.7105785124, 117.5794214876)
 
-_editor.add_node(node8, 734.82328943174, 82.731564294484)
-
-var node9 = ::loggraph::nodes::to_polytope::ToPolytope()
-
-_editor.add_node(node9, 541.7105785124, 117.5794214876)
-
-Blueprint.connect(node0, "str", node1, "data")
-Blueprint.connect(node5, "str", node1, "proto")
-Blueprint.connect(node1, "nodes", node2, "data")
-Blueprint.connect(node2, "boolean", node3, "data")
-Blueprint.connect(node3, "poly_0", node6, "var")
-Blueprint.connect(node3, "transform", node4, "data")
-Blueprint.connect(node4, "poly_1", node9, "var")
-Blueprint.connect(node9, "geo", node8, "geos")
-Blueprint.connect(node7, "this", node8, "view_cam")
+Blueprint.connect(node1, "str", node2, "data")
+Blueprint.connect(node6, "str", node2, "proto")
+Blueprint.connect(node2, "nodes", node3, "data")
+Blueprint.connect(node3, "boolean", node4, "data")
+Blueprint.connect(node4, "poly_0", node7, "var")
+Blueprint.connect(node4, "transform", node5, "data")
+Blueprint.connect(node5, "poly_1", node8, "var")
