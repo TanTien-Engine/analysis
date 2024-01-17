@@ -2,7 +2,7 @@ import "blueprint.node" for Node
 import "blueprint.pin" for Pin
 import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
 import "blueprint.blueprint" for Blueprint
-import "loggraph.variant" for VAR_TYPE_NODE, VAR_TYPE_VARIANT
+import "loggraph.variant" for VAR_TYPE_LOG_NODE, VAR_TYPE_LOG_VAR
 
 class Expand is Node
 {
@@ -11,7 +11,7 @@ class Expand is Node
 		super.init()
 
 		this.imports = [
-			Pin(this, "data", [ VAR_TYPE_ARRAY, VAR_TYPE_NODE, VAR_TYPE_VARIANT ]),
+			Pin(this, "data", [ VAR_TYPE_ARRAY, VAR_TYPE_LOG_NODE, VAR_TYPE_LOG_VAR ]),
 		]
 
 		this.layout()
@@ -86,28 +86,28 @@ class Expand is Node
 				export_values.add(Variant(data.value[i]))
 			}
 		}
-		else if (data.type == VAR_TYPE_NODE)
+		else if (data.type == VAR_TYPE_LOG_NODE)
 		{
 			var children = data.value.get_children()
 			if (!children.isEmpty)
 			{
 				for (var child in children) {
-					export_values.add(Variant(VAR_TYPE_NODE, child))
+					export_values.add(Variant(VAR_TYPE_LOG_NODE, child))
 				}
 			}
 			else
 			{
 				var items = data.value.get_data()
 				for (var item in items) {
-					export_values.add(Variant(VAR_TYPE_VARIANT, item))
+					export_values.add(Variant(VAR_TYPE_LOG_VAR, item))
 				}
 			}
 		}
-		else if (data.type == VAR_TYPE_VARIANT)
+		else if (data.type == VAR_TYPE_LOG_VAR)
 		{
 			var children = data.value.get_children()
 			for (var child in children) {
-				export_values.add(Variant(VAR_TYPE_VARIANT, child))
+				export_values.add(Variant(VAR_TYPE_LOG_VAR, child))
 			}
 		}
 

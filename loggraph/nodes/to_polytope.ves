@@ -4,7 +4,7 @@ import "blueprint.variant" for Variant, VAR_TYPE_NUMBER3
 import "blueprint.blueprint" for Blueprint
 import "geograph.variant" for VAR_TYPE_GEO, VarGeo
 import "geograph.brush" for Brush
-import "loggraph.variant" for VAR_TYPE_VARIANT
+import "loggraph.variant" for VAR_TYPE_LOG_VAR
 import "maths.vector" for Vector3
 import "loggraph" for NodeAdapter
 
@@ -15,7 +15,7 @@ class ToPolytope is Node
 		super.init()
 
 		this.imports = [
-			Pin(this, "var", VAR_TYPE_VARIANT),
+			Pin(this, "var", VAR_TYPE_LOG_VAR),
 		]
 		this.exports = [
 			Pin(this, "geo", VAR_TYPE_GEO),

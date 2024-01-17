@@ -2,7 +2,7 @@ import "blueprint.node" for Node
 import "blueprint.pin" for Pin
 import "blueprint.variant" for Variant, VAR_TYPE_NUMBER3
 import "blueprint.blueprint" for Blueprint
-import "loggraph.variant" for VAR_TYPE_VARIANT
+import "loggraph.variant" for VAR_TYPE_LOG_VAR
 import "maths.vector" for Vector3
 
 class ToVector3 is Node
@@ -12,7 +12,7 @@ class ToVector3 is Node
 		super.init()
 
 		this.imports = [
-			Pin(this, "var", VAR_TYPE_VARIANT),
+			Pin(this, "var", VAR_TYPE_LOG_VAR),
 		]
 		this.exports = [
 			Pin(this, "vec3", VAR_TYPE_NUMBER3),

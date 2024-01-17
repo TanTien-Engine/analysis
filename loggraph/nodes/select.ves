@@ -3,7 +3,7 @@ import "blueprint.pin" for Pin
 import "blueprint.blueprint" for Blueprint
 import "blueprint.variant" for Variant, VAR_TYPE_ARRAY, VAR_TYPE_STRING
 import "blueprint.variant_helper" for VariantHelper
-import "loggraph.variant" for VAR_TYPE_NODE
+import "loggraph.variant" for VAR_TYPE_LOG_NODE
 import "loggraph" for LogGraph
 
 class Select is Node
@@ -31,7 +31,7 @@ class Select is Node
 			return nil
 		}
 
-		var nodes = VariantHelper.flatten_values(v_nodes, VAR_TYPE_NODE)
+		var nodes = VariantHelper.flatten_values(v_nodes, VAR_TYPE_LOG_NODE)
 
 		var v_needs = Blueprint.calc_input_value(this, 1)
 		var needs = VariantHelper.flatten_values(v_needs, VAR_TYPE_STRING)
@@ -43,7 +43,7 @@ class Select is Node
 
 		var ret = []
 		for (var n in selected) {
-			ret.add(Variant(VAR_TYPE_NODE, n))
+			ret.add(Variant(VAR_TYPE_LOG_NODE, n))
 		}
 		return Variant(ret)
 	}
