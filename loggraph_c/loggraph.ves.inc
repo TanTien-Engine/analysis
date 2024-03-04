@@ -36,6 +36,7 @@ foreign class Variant
 foreign class NodeAdapter
 {
 	foreign static to_polytope(node)
+	foreign static to_graph(node)
 }
 
 foreign class Traceback
@@ -43,6 +44,26 @@ foreign class Traceback
 	init() {}
 
 	foreign print()
+}
+
+foreign class Graph2
+{
+	init() {}
+
+	foreign get_nodes()
+	foreign get_edges()
+
+	foreign query_node(x, y)
+
+	foreign layout()
+}
+
+foreign class GraphNode
+{
+	init() {}
+
+	foreign get_pos()
+	foreign set_pos(x, y)
 }
 
 foreign class LogGraph

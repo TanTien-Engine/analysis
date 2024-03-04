@@ -1,0 +1,8 @@
+message node {
+	int id
+}
+
+message edge {
+	int from
+	int to
+}

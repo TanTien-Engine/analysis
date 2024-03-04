@@ -7,6 +7,10 @@
 #include "NodeAdapter.h"
 #include "modules/script/TransHelper.h"
 
+#include <graph/Graph.h>
+#include <graph/Node.h>
+#include <graph/GraphTools.h>
+
 #include <string>
 #include <vector>
 #include <sstream>
@@ -219,6 +223,21 @@ void w_NodeAdapter_to_polytope()
     tt::return_poly(poly);
 }
 
+void w_NodeAdapter_to_graph()
+{
+    auto node = ((tt::Proxy<loggraph::Node>*)ves_toforeign(1))->obj;
+
+    auto graph = loggraph::NodeAdapter::ToGraph(node);
+
+    ves_pop(ves_argnum());
+
+    ves_pushnil();
+    ves_import_class("loggraph", "Graph2");
+    auto proxy = (tt::Proxy<graph::Graph>*)ves_set_newforeign(0, 1, sizeof(tt::Proxy<graph::Graph>));
+    proxy->obj = graph;
+    ves_pop(1);
+}
+
 void w_Traceback_print()
 {
     auto traceback = ((tt::Proxy<loggraph::Traceback>*)ves_toforeign(0))->obj;
@@ -235,6 +254,134 @@ void w_Traceback_print()
         }
         printf("\n");
     }
+}
+
+void w_Graph_allocate()
+{
+    auto proxy = (tt::Proxy<graph::Graph>*)ves_set_newforeign(0, 0, sizeof(tt::Proxy<graph::Graph>));
+    proxy->obj = std::make_shared<graph::Graph>();
+}
+
+int w_Graph_finalize(void* data)
+{
+    auto proxy = (tt::Proxy<graph::Graph>*)(data);
+    proxy->~Proxy();
+    return sizeof(tt::Proxy<graph::Graph>);
+}
+
+void w_Graph_get_nodes()
+{
+    auto graph = ((tt::Proxy<graph::Graph>*)ves_toforeign(0))->obj;
+
+    auto& nodes = graph->GetNodes();
+
+    ves_pop(ves_argnum());
+
+    const int num = (int)(nodes.size());
+    ves_newlist(num);
+    for (int i = 0; i < num; ++i)
+    {
+        ves_pushnil();
+        ves_import_class("loggraph", "GraphNode");
+        auto proxy = (tt::Proxy<graph::Node>*)ves_set_newforeign(1, 2, sizeof(tt::Proxy<graph::Node>));
+        proxy->obj = std::static_pointer_cast<graph::Node>(nodes[i]);
+        ves_pop(1);
+        ves_seti(-2, i);
+        ves_pop(1);
+    }
+}
+
+void w_Graph_get_edges()
+{
+    auto graph = ((tt::Proxy<graph::Graph>*)ves_toforeign(0))->obj;
+
+    auto& nodes = graph->GetNodes();
+
+    std::map<std::shared_ptr<graph::Node>, size_t> node2idx;
+    for (size_t i = 0, n = nodes.size(); i < n; ++i) {
+        node2idx.insert({ nodes[i], i });
+    }
+
+    std::set<std::pair<size_t, size_t>> edges;
+    for (auto& node : nodes)
+    {
+        size_t i0 = node2idx.find(node)->second;
+        for (auto& conn : node->GetConnects())
+        {
+            size_t i1 = node2idx.find(conn)->second;
+            if (i0 < i1)
+                edges.insert({ i0, i1 });
+            else
+                edges.insert({ i1, i0 });
+        }
+    }
+
+    std::vector<sm::ivec2> list;
+    for (auto& edge : edges)
+    {
+        int n0 = static_cast<int>(edge.first);
+        int n1 = static_cast<int>(edge.second);
+        list.push_back({ n0, n1 });
+    }
+    tt::return_list(list);
+}
+
+void w_Graph_query_node()
+{
+    auto graph = ((tt::Proxy<graph::Graph>*)ves_toforeign(0))->obj;
+
+    float x = (float)ves_tonumber(1);
+    float y = (float)ves_tonumber(2);
+
+    auto node = graph::GraphTools::QueryNode(*graph, sm::vec2(x, y));
+    if (!node)
+    {
+        ves_set_nil(0);
+        return;
+    }
+
+    ves_pop(ves_argnum());
+
+    ves_pushnil();
+    ves_import_class("loggraph", "Node");
+    auto proxy = (tt::Proxy<graph::Node>*)ves_set_newforeign(0, 1, sizeof(tt::Proxy<graph::Node>));
+    proxy->obj = std::static_pointer_cast<graph::Node>(node);
+    ves_pop(1);
+}
+
+void w_Graph_layout()
+{
+    auto graph = ((tt::Proxy<graph::Graph>*)ves_toforeign(0))->obj;
+    graph::GraphTools::Layout(*graph);
+}
+
+void w_GraphNode_allocate()
+{
+    auto proxy = (tt::Proxy<graph::Node>*)ves_set_newforeign(0, 0, sizeof(tt::Proxy<graph::Node>));
+    proxy->obj = std::make_shared<graph::Node>();
+}
+
+int w_GraphNode_finalize(void* data)
+{
+    auto proxy = (tt::Proxy<graph::Node>*)(data);
+    proxy->~Proxy();
+    return sizeof(tt::Proxy<graph::Node>);
+}
+
+void w_GraphNode_get_pos()
+{
+    auto node = ((tt::Proxy<graph::Node>*)ves_toforeign(0))->obj;
+    tt::return_vec(node->GetPos());
+}
+
+void w_GraphNode_set_pos()
+{
+    auto node = ((tt::Proxy<graph::Node>*)ves_toforeign(0))->obj;
+
+    float x = (float)ves_tonumber(1);
+    float y = (float)ves_tonumber(2);
+
+    node->SetPos({ x, y });
 }
 
 std::vector<const char*> list_to_strings(int index)
@@ -516,8 +663,17 @@ VesselForeignMethodFn LogGraphBindMethod(const char* signature)
     if (strcmp(signature, "Variant.get_children()") == 0) return w_Variant_get_children;
 
     if (strcmp(signature, "static NodeAdapter.to_polytope(_)") == 0) return w_NodeAdapter_to_polytope;
+    if (strcmp(signature, "static NodeAdapter.to_graph(_)") == 0) return w_NodeAdapter_to_graph;
 
     if (strcmp(signature, "Traceback.print()") == 0) return w_Traceback_print;
+
+    if (strcmp(signature, "Graph2.get_nodes()") == 0) return w_Graph_get_nodes;
+    if (strcmp(signature, "Graph2.get_edges()") == 0) return w_Graph_get_edges;
+    if (strcmp(signature, "Graph2.query_node(_,_)") == 0) return w_Graph_query_node;
+    if (strcmp(signature, "Graph2.layout()") == 0) return w_Graph_layout;
+
+    if (strcmp(signature, "GraphNode.get_pos()") == 0) return w_GraphNode_get_pos;
+    if (strcmp(signature, "GraphNode.set_pos(_,_)") == 0) return w_GraphNode_set_pos;
 
     if (strcmp(signature, "static LogGraph.split(_)") == 0) return w_LogGraph_split;
     if (strcmp(signature, "static LogGraph.sort(_)") == 0) return w_LogGraph_sort;
@@ -548,6 +704,20 @@ void LogGraphBindClass(const char* class_name, VesselForeignClassMethods* method
     {
         methods->allocate = w_Variant_allocate;
         methods->finalize = w_Variant_finalize;
+        return;
+    }
+
+    if (strcmp(class_name, "Graph2") == 0)
+    {
+        methods->allocate = w_Graph_allocate;
+        methods->finalize = w_Graph_finalize;
+        return;
+    }
+
+    if (strcmp(class_name, "GraphNode") == 0)
+    {
+        methods->allocate = w_GraphNode_allocate;
+        methods->finalize = w_GraphNode_finalize;
         return;
     }
 }

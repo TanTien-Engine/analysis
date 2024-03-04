@@ -1,0 +1,167 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant, VAR_TYPE_NUMBER2
+import "blueprint.node_editor" for NodeEditor
+import "blueprint.blueprint" for Blueprint
+import "blueprint.nodes.array" for Array
+import "blueprint.node_style" for TB_TITLE
+import "loggraph.variant" for VAR_TYPE_LOG_VAR, VAR_TYPE_GRAPH
+import "geograph.variant" for VAR_TYPE_GEO, VarGeo
+import "geograph.config" for POINT_RADIUS
+import "maths.vector" for Vector2
+import "loggraph" for NodeAdapter
+import "graphics" for Graphics, Painter
+import "geometry" for Line
+
+var EDITOR = nil
+
+class Graph is Node
+{
+	init() 
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "var", VAR_TYPE_LOG_VAR),
+		]
+		this.exports = [
+			Pin(this, "graph", VAR_TYPE_GRAPH),
+		]
+
+		this.layout()
+
+		this.v_graph = nil
+
+		this.edit_nodes = Array()
+		this.edit_edges = Array()
+	}
+
+	on_pin_dirty(pin)
+	{
+		super.on_pin_dirty(pin)
+
+		this.v_graph = nil
+	}
+
+	calc_value(idx)
+	{
+		if (!this.v_graph) {
+			this.v_graph = this.calc_value_impl()
+		}
+		return this.v_graph
+	}
+
+	calc_value_impl()
+	{
+		var v_var = Blueprint.calc_input_value(this, 0)
+		if (!v_var) {
+			return nil
+		}
+
+		var graph = NodeAdapter.to_graph(v_var.value)
+		this.rebuild_graph_drawable(graph)
+		return Variant(VAR_TYPE_GRAPH, graph)
+	}
+
+	to_string(name) 
+	{
+		var ret = super.to_string(name)
+		return ret + "
+%(name).nodes = %(this.edit_nodes.list)
+"
+	}
+
+	bind_editor()
+	{
+		if (!EDITOR) {
+			EDITOR = NodeEditor("../../../assets/blueprints/editor/graph.ves")
+		}
+
+		Blueprint.connect(this.edit_nodes.exports[0], EDITOR.editor_node.imports[1])
+		Blueprint.connect(this.edit_edges.exports[0], EDITOR.editor_node.imports[2])
+
+		Blueprint.send_node_dirty_root(EDITOR.editor_node)
+
+		return true
+	}
+
+	draw_editor() 
+	{
+		Graphics.on_cam_update(0, 0, 1)
+
+		if (EDITOR) {
+			EDITOR.draw()
+		}
+	}
+
+	on_mouse_pressed(x, y, btn) 
+	{
+		EDITOR.on_mouse_pressed(x, y, btn)
+	}
+
+	on_mouse_released(x, y, btn) 
+	{
+		EDITOR.on_mouse_released(x, y, btn)
+	}
+
+	on_mouse_dragged(x, y, btn) 
+	{
+		EDITOR.on_mouse_dragged(x, y, btn)
+
+		this.update_nodes_pos(this.v_graph.value)
+
+		this.rebuild_edge_drawable(this.v_graph.value)
+	}
+
+	rebuild_graph_drawable(graph)
+	{
+		this.edit_nodes.list.clear()
+
+		var w = Graphics.get_width()
+		var h = Graphics.get_height()
+
+		var nodes = graph.get_nodes()
+		for (var node in nodes)
+		{
+			var pos = node.get_pos()
+			var x = (pos["x"] - 0.5) * w
+			var y = (pos["y"] - 0.5) * h
+
+			this.edit_nodes.list.add(Variant(VAR_TYPE_NUMBER2, Vector2(x, y)))
+		}
+
+		this.rebuild_edge_drawable(graph)
+	}
+
+	rebuild_edge_drawable(graph)
+	{
+		this.edit_edges.list.clear()
+
+		var edges = graph.get_edges()
+		for (var i in 0 .. edges.count / 2)
+		{
+			var n0 = this.edit_nodes.list[edges[i* 2]].value
+			var n1 = this.edit_nodes.list[edges[i* 2 + 1]].value
+
+			var geo = VarGeo()
+			geo.shape = Line.init()
+			geo.shape.set(n0.x, n0.y, n1.x, n1.y)
+			this.edit_edges.list.add(Variant(VAR_TYPE_GEO, geo))
+		}
+	}
+
+	update_nodes_pos(graph)
+	{
+		var w = Graphics.get_width()
+		var h = Graphics.get_height()
+
+		var nodes = graph.get_nodes()
+		for (var i in 0 .. nodes.count)
+		{
+			var pos = this.edit_nodes.list[i].value
+			var x = pos.x / w + 0.5
+			var y = pos.y / h + 0.5
+			nodes[i].set_pos(x, y)
+		}
+	}
+}
