@@ -1,19 +1,16 @@
 import "blueprint.node" for Node
 import "blueprint.pin" for Pin
 import "blueprint.variant" for Variant, VAR_TYPE_NUMBER2
-import "blueprint.node_editor" for NodeEditor
 import "blueprint.blueprint" for Blueprint
-import "blueprint.nodes.array" for Array
 import "blueprint.node_style" for TB_TITLE
+import "blueprint.nodes.camera2d" for Camera2d
 import "loggraph.variant" for VAR_TYPE_LOG_VAR, VAR_TYPE_GRAPH
-import "geograph.variant" for VAR_TYPE_GEO, VarGeo
 import "geograph.config" for POINT_RADIUS
 import "maths.vector" for Vector2
+import "maths.calc" for Calc
 import "loggraph" for NodeAdapter
 import "graphics" for Graphics, Painter
-import "geometry" for Line
-
-var EDITOR = nil
+import "maths" for Float3
 
 class Graph is Node
 {
@@ -32,8 +29,10 @@ class Graph is Node
 
 		this.v_graph = nil
 
-		this.edit_nodes = Array()
-		this.edit_edges = Array()
+		// editor
+		this.editor_cam = Camera2d()
+		this.editor_sel = []
+		this.last_pos = nil
 	}
 
 	on_pin_dirty(pin)
@@ -59,109 +58,131 @@ class Graph is Node
 		}
 
 		var graph = NodeAdapter.to_graph(v_var.value)
-		this.rebuild_graph_drawable(graph)
 		return Variant(VAR_TYPE_GRAPH, graph)
-	}
-
-	to_string(name) 
-	{
-		var ret = super.to_string(name)
-		return ret + "
-%(name).nodes = %(this.edit_nodes.list)
-"
-	}
-
-	bind_editor()
-	{
-		if (!EDITOR) {
-			EDITOR = NodeEditor("../../../assets/blueprints/editor/graph.ves")
-		}
-
-		Blueprint.connect(this.edit_nodes.exports[0], EDITOR.editor_node.imports[1])
-		Blueprint.connect(this.edit_edges.exports[0], EDITOR.editor_node.imports[2])
-
-		Blueprint.send_node_dirty_root(EDITOR.editor_node)
-
-		return true
 	}
 
 	draw_editor() 
 	{
-		Graphics.on_cam_update(0, 0, 1)
+		var v_mat = Blueprint.calc_output_value(this.editor_cam, "mat")
+		var mat = v_mat.value
 
-		if (EDITOR) {
-			EDITOR.draw()
+		var pt = Painter.init()
+
+		var nodes = this.v_graph.value.get_nodes()
+		for (var node in nodes)
+		{
+			var pos = this.node_pos_to_world(node.get_pos())
+
+			pt.add_circle(mat, pos.x, pos.y, POINT_RADIUS, [0, 0, 0, 255], 2.0, 24)
+
+			var p = Float3.init(pos.x, pos.y, 0)
+			p.transform(mat)
+			Graphics.draw_text("%(pos.x)", p.x(), p.y(), 0.5, TB_TITLE)
 		}
+
+		var edges = this.v_graph.value.get_edges()
+		for (var i in 0 .. edges.count / 2) 
+		{
+			var f = nodes[edges[i * 2]].get_pos()
+			var t = nodes[edges[i * 2 + 1]].get_pos()
+			f = this.node_pos_to_world(Vector2(f["x"], f["y"]))
+			t = this.node_pos_to_world(Vector2(t["x"], t["y"]))
+
+			var dist = Calc.dis_pos_to_pos(t, f)
+
+			var p = POINT_RADIUS / dist
+
+			var dx = t.x - f.x
+			var dy = t.y - f.y
+
+			f.x = f.x + dx * p
+			f.y = f.y + dy * p
+			t.x = t.x - dx * p
+			t.y = t.y - dy * p
+
+			pt.add_line(mat, [ f.x, f.y, t.x, t.y ], [0, 0, 0, 255], 2)
+
+			// draw arrow
+			var c = Vector2(- dx / dist * POINT_RADIUS, - dy / dist * POINT_RADIUS)
+			var p0 = Calc.rotate_vec2(c, 0.5)
+			var p1 = Calc.rotate_vec2(c, -0.5)
+			pt.add_line(mat, [ t.x, t.y, t.x + p0.x, t.y + p0.y ], [0, 0, 0, 255], 2)
+			pt.add_line(mat, [ t.x, t.y, t.x + p1.x, t.y + p1.y ], [0, 0, 0, 255], 2)			
+		}
+
+		Graphics.draw_painter(pt)
 	}
 
 	on_mouse_pressed(x, y, btn) 
 	{
-		EDITOR.on_mouse_pressed(x, y, btn)
-	}
+		this.editor_cam.on_mouse_pressed(x, y, btn)
 
-	on_mouse_released(x, y, btn) 
-	{
-		EDITOR.on_mouse_released(x, y, btn)
+		var v_mat = Blueprint.calc_output_value(this.editor_cam, "mat")
+		var mat = v_mat.value
+
+		var curr_pos = this.editor_cam.screen2world(Vector2(x, y))
+		this.last_pos = curr_pos
+
+		this.editor_sel.clear()
+
+		var nodes = this.v_graph.value.get_nodes()
+		for (var node in nodes)
+		{
+			var pos = this.node_pos_to_world(node.get_pos())
+			var dist = Calc.dis_pos_to_pos(pos, curr_pos)
+			if (dist < POINT_RADIUS * this.editor_cam.scale) {
+				this.editor_sel.add(node)
+			}
+		}
 	}
 
 	on_mouse_dragged(x, y, btn) 
 	{
-		EDITOR.on_mouse_dragged(x, y, btn)
+		this.editor_cam.on_mouse_dragged(x, y, btn) 
 
-		this.update_nodes_pos(this.v_graph.value)
+		var curr_pos = this.editor_cam.screen2world(Vector2(x, y))
 
-		this.rebuild_edge_drawable(this.v_graph.value)
-	}
+		var dx = curr_pos.x - this.last_pos.x
+		var dy = curr_pos.y - this.last_pos.y
 
-	rebuild_graph_drawable(graph)
-	{
-		this.edit_nodes.list.clear()
-
-		var w = Graphics.get_width()
-		var h = Graphics.get_height()
-
-		var nodes = graph.get_nodes()
-		for (var node in nodes)
+		for (var node in this.editor_sel)
 		{
-			var pos = node.get_pos()
-			var x = (pos["x"] - 0.5) * w
-			var y = (pos["y"] - 0.5) * h
-
-			this.edit_nodes.list.add(Variant(VAR_TYPE_NUMBER2, Vector2(x, y)))
+			var p = node.get_pos()
+			p = this.node_pos_to_world(Vector2(p["x"], p["y"]))
+			p.x = p.x + dx
+			p.y = p.y + dy
+			p = this.node_pos_to_local(p)
+			node.set_pos(p.x, p.y)
 		}
 
-		this.rebuild_edge_drawable(graph)
+		this.last_pos = curr_pos
 	}
 
-	rebuild_edge_drawable(graph)
+	on_mouse_scrolled(x, y, dx, dy) 
 	{
-		this.edit_edges.list.clear()
-
-		var edges = graph.get_edges()
-		for (var i in 0 .. edges.count / 2)
-		{
-			var n0 = this.edit_nodes.list[edges[i* 2]].value
-			var n1 = this.edit_nodes.list[edges[i* 2 + 1]].value
-
-			var geo = VarGeo()
-			geo.shape = Line.init()
-			geo.shape.set(n0.x, n0.y, n1.x, n1.y)
-			this.edit_edges.list.add(Variant(VAR_TYPE_GEO, geo))
-		}
+		this.editor_cam.on_mouse_scrolled(x, y, dx, dy) 
 	}
 
-	update_nodes_pos(graph)
+	on_key_pressed(key)
+	{
+		this.editor_cam.on_key_pressed(key)
+	}
+
+	node_pos_to_world(local)
 	{
 		var w = Graphics.get_width()
 		var h = Graphics.get_height()
+		var x = (local["x"] - 0.5) * w
+		var y = (local["y"] - 0.5) * h
+		return Vector2(x, y)
+	}
 
-		var nodes = graph.get_nodes()
-		for (var i in 0 .. nodes.count)
-		{
-			var pos = this.edit_nodes.list[i].value
-			var x = pos.x / w + 0.5
-			var y = pos.y / h + 0.5
-			nodes[i].set_pos(x, y)
-		}
+	node_pos_to_local(world)
+	{
+		var w = Graphics.get_width()
+		var h = Graphics.get_height()
+		var x = world["x"] / w + 0.5
+		var y = world["y"] / h + 0.5
+		return Vector2(x, y)
 	}
 }
