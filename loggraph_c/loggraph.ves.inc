@@ -46,26 +46,6 @@ foreign class Traceback
 	foreign print()
 }
 
-foreign class Graph2
-{
-	init() {}
-
-	foreign get_nodes()
-	foreign get_edges()
-
-	foreign query_node(x, y)
-
-	foreign layout()
-}
-
-foreign class GraphNode
-{
-	init() {}
-
-	foreign get_pos()
-	foreign set_pos(x, y)
-}
-
 foreign class LogGraph
 {
 	foreign static split(str)
