@@ -18,9 +18,9 @@ class Print is Node
 		this.layout()
 	}
 
-	on_pin_dirty(pin)
+	on_pin_dirty(pin, type, msg)
 	{
-		super.on_pin_dirty(pin)
+		super.on_pin_dirty(pin, type, msg)
 
 		this.print_input_value()
 	}

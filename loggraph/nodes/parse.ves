@@ -24,9 +24,9 @@ class Parse is Node
 		this.v_nodes = nil
 	}
 
-	on_pin_dirty(pin)
+	on_pin_dirty(pin, type, msg)
 	{
-		super.on_pin_dirty(pin)
+		super.on_pin_dirty(pin, type, msg)
 
 		this.v_nodes = nil
 	}
@@ -49,6 +49,7 @@ class Parse is Node
 		for (var n in nodes) {
 			this.v_nodes.add(Variant(VAR_TYPE_LOG_NODE, n))
 		}
+
 		return Variant(this.v_nodes)
 	}
 }

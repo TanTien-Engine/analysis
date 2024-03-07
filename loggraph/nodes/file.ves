@@ -3,6 +3,7 @@ import "blueprint.pin" for Pin
 import "blueprint.variant" for Variant, VAR_TYPE_STRING
 import "blueprint.node_param" for NodeParam
 import "blueprint.blueprint" for Blueprint
+import "blueprint.dirty_types" for DIRTY_FILE
 import "io" for IO
 import "filesystem" for Filesystem
 
@@ -36,7 +37,7 @@ class File is Node
 		if (time != this.last_write_time) 
 		{
 			this.load_from_file()
-			Blueprint.send_pin_dirty_root(this.exports[0])
+			Blueprint.send_pin_dirty_root(this.exports[0], DIRTY_FILE)
 		}
 	}
 
