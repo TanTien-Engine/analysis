@@ -111,8 +111,6 @@ NodeAdapter::ToGraph(const std::shared_ptr<Node>& node)
 		}
 	}
 
-	graph::GraphTools::Layout(*graph);
-
 	return graph;
 }
 

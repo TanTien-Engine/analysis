@@ -5,6 +5,6 @@ File, Split, Sort, RmDup, Parse,
 Print, Histogram, Find, Traceback, Unique, Select, String,
 Diff, RegexReplace,
 Expand,
-ToVector3, ToPolytope, Graph,
+ToVector3, ToPolytope, ToGraph,
 Tracing,
 ]

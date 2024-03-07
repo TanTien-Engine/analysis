@@ -1,0 +1,35 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant
+import "blueprint.blueprint" for Blueprint
+import "loggraph.variant" for VAR_TYPE_LOG_VAR
+import "graph.variant" for VAR_TYPE_GRAPH
+import "loggraph" for NodeAdapter
+
+class ToGraph is Node
+{
+	init() 
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "var", VAR_TYPE_LOG_VAR),
+		]
+		this.exports = [
+			Pin(this, "graph", VAR_TYPE_GRAPH),
+		]
+
+		this.layout()
+	}
+
+	calc_value(idx)
+	{
+		var v_var = Blueprint.calc_input_value(this, 0)
+		if (!v_var) {
+			return nil
+		}
+
+		var graph = NodeAdapter.to_graph(v_var.value)
+		return Variant(VAR_TYPE_GRAPH, graph)
+	}
+}

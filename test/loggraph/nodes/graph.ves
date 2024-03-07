@@ -1,34 +1,37 @@
 var node0 = ::loggraph::nodes::file::File()
 node0.query_param("filepath").value = "../assets/graph.txt"
 
-_editor.add_node(node0, -186, 189)
+_editor.add_node(node0, -299, -163)
 
 var node1 = ::loggraph::nodes::parse::Parse()
 
-_editor.add_node(node1, -27, 156.58829190753)
+_editor.add_node(node1, -140, -195.41170809247)
 
 var node2 = ::loggraph::nodes::expand::Expand()
 
-_editor.add_node(node2, 114, 169)
+_editor.add_node(node2, 1, -183)
 
 var node3 = ::loggraph::nodes::file::File()
 node3.query_param("filepath").value = "../assets/proto_graph.txt"
 
-_editor.add_node(node3, -181, 107)
+_editor.add_node(node3, -294, -245)
 
-var node4 = ::loggraph::nodes::graph::Graph()
+var node4 = ::loggraph::nodes::to_graph::ToGraph()
 
-node4.nodes = [ ::blueprint::variant::Variant("num2", ::maths::vector::Vector2(-102.04656982422, -122.44010925293)), ::blueprint::variant::Variant("num2", ::maths::vector::Vector2(-176.08932495117, -22.570793151855)), ::blueprint::variant::Variant("num2", ::maths::vector::Vector2(50.2939453125, -124.28258514404)), ::blueprint::variant::Variant("num2", ::maths::vector::Vector2(128.59173583984, -26.255744934082)), ::blueprint::variant::Variant("num2", ::maths::vector::Vector2(-97.791534423828, 75.456024169922)), ::blueprint::variant::Variant("num2", ::maths::vector::Vector2(54.549011230469, 73.613571166992)) ]
+_editor.add_node(node4, 147.52016441997, -182.43378805472)
 
-_editor.add_node(node4, 138.52016441997, 35.566211945284)
+var node5 = ::graph::nodes::draw::Draw()
 
-var node5 = ::geograph::nodes::draw_geometry::DrawGeometry()
-node5.query_param("skip").value = false
+_editor.add_node(node5, 69.4, -314.9)
 
-_editor.add_node(node5, 285, 16)
+var node6 = ::graph::nodes::layout::Layout()
+node6.query_param("method").value = "hierarchy"
+
+_editor.add_node(node6, -86.859033203125, -325.11186523438)
 
 Blueprint.connect(node0, "str", node1, "data")
 Blueprint.connect(node3, "str", node1, "proto")
 Blueprint.connect(node1, "nodes", node2, "data")
 Blueprint.connect(node2, "test", node4, "var")
-Blueprint.connect(node4, "graph", node5, "geos")
+Blueprint.connect(node4, "graph", node6, "graph")
+Blueprint.connect(node6, "graph", node5, "graph")

@@ -38,6 +38,11 @@ class Logeditor is Editor
 		import "geograph.nodes.draw_geometry" for DrawGeometry
 		super.add_popup_node(DrawGeometry)
 
+		import "editor.graphnodes" for GRAPH_NODES
+		for (var node in GRAPH_NODES) {
+			super.add_popup_node(node)
+		}
+
 		import "lognodes" for LOG_NODES
 		for (var node in LOG_NODES) {
 			super.add_popup_node(node)

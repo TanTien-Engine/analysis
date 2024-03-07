@@ -2,4 +2,3 @@ var VAR_TYPE_LOG_NODE	= "node"
 var VAR_TYPE_LOG_VAR	= "variant"
 
 var VAR_TYPE_TRACEBACK	= "traceback"
-var VAR_TYPE_GRAPH	    = "graph"
