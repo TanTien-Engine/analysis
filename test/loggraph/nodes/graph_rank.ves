@@ -1,0 +1,37 @@
+var node0 = ::loggraph::nodes::file::File()
+node0.query_param("filepath").value = "../assets/graph_rank.txt"
+
+_editor.add_node(node0, -299, -163)
+
+var node1 = ::loggraph::nodes::parse::Parse()
+
+_editor.add_node(node1, -140, -195.41170809247)
+
+var node2 = ::loggraph::nodes::expand::Expand()
+
+_editor.add_node(node2, 1, -183)
+
+var node3 = ::loggraph::nodes::file::File()
+node3.query_param("filepath").value = "../assets/proto_graph_rank.txt"
+
+_editor.add_node(node3, -294, -245)
+
+var node4 = ::loggraph::nodes::to_graph::ToGraph()
+
+_editor.add_node(node4, 147.52016441997, -182.43378805472)
+
+var node5 = ::graph::nodes::draw::Draw()
+
+_editor.add_node(node5, 69.4, -314.9)
+
+var node6 = ::graph::nodes::layout::Layout()
+node6.query_param("method").value = "hierarchy"
+
+_editor.add_node(node6, -86.859033203125, -325.11186523438)
+
+Blueprint.connect(node0, "str", node1, "data")
+Blueprint.connect(node3, "str", node1, "proto")
+Blueprint.connect(node1, "nodes", node2, "data")
+Blueprint.connect(node2, "test", node4, "var")
+Blueprint.connect(node4, "graph", node6, "graph")
+Blueprint.connect(node6, "graph", node5, "graph")

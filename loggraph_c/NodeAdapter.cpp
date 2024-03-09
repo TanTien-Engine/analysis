@@ -79,13 +79,21 @@ NodeAdapter::ToGraph(const std::shared_ptr<Node>& node)
 		auto group = reinterpret_cast<const loggraph::VarGroup*>(item.obj);
 		if (group->name == "node")
 		{
-			assert(group->children.size() == 1);
-
 			auto node = std::make_shared<graph::Node>();
 
-			auto c = group->children[0];
-			assert(c.first == "id" && c.second.type == VarType::Integer);
-			node->SetId(c.second.i);
+			for (auto c : group->children)
+			{
+				if (c.first == "id")
+				{
+					assert(c.second.type == VarType::Integer);
+					node->SetId(c.second.i);
+				}
+				else if (c.first == "rank")
+				{
+					assert(c.second.type == VarType::Integer);
+					node->SetRank(c.second.i);
+				}
+			}
 
 			id2idx.insert({ node->GetId(), graph->GetNodes().size() });
 

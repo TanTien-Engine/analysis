@@ -1,11 +1,11 @@
 $begin graph test
 
-node 0
-node 1
-node 2
-node 3
-node 4
-node 5
+node 0 1
+node 1 2
+node 2 3
+node 3 3
+node 4 3
+node 5 4
 edge 0 1
 edge 1 2
 edge 1 3
@@ -14,12 +14,13 @@ edge 2 5
 edge 3 5
 edge 4 5
 
-node 10
-node 11
-node 12
+node 10 3
+node 11 5
+node 12 5
 edge 10 11
 edge 10 12
 
-node 13
+node 13 3
+node 14 5
 
 $end

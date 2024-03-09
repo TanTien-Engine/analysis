@@ -1,0 +1,9 @@
+message node {
+	int id
+	int rank
+}
+
+message edge {
+	int from
+	int to
+}
