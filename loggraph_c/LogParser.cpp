@@ -44,6 +44,12 @@ lexer::Tokenizer<LogToken::Type>::Token LogTokenizer::EmitToken()
                     DiscardUntil("\n\r");
                 }
                 break;
+            case '{':
+                Advance();
+                return Token(LogToken::OBrace, c, c + 1, Offset(c), start_line, start_column);
+            case '}':
+                Advance();
+                return Token(LogToken::CBrace, c, c + 1, Offset(c), start_line, start_column);
             case '$':
             {
                 LogToken::Type type;
@@ -232,11 +238,30 @@ Variant LogParser::ParseMessage(const Message& msg, Token& token)
         {
             if (src[i].type == VarType::Integer)
             {
-                while (m_tokenizer.PeekToken().GetType() == (int)VarType::Integer && src[i].type == VarType::Integer)
+                if (m_tokenizer.PeekToken().GetType() == LogToken::OBrace)
                 {
+                    // skip {
+                    m_tokenizer.NextToken();
+
+                    while (!Check(LogToken::CBrace, m_tokenizer.PeekToken()))
+                    {
+                        token = m_tokenizer.NextToken();
+                        var = token.ToInteger<int>();
+                        dst.children.push_back({ name, var });
+                    }
+
+                    // skip }
                     token = m_tokenizer.NextToken();
-                    var = token.ToInteger<int>();
-                    dst.children.push_back({ name, var });
+                    Expect(LogToken::CBrace, token);
+                }
+                else
+                {
+                    while (m_tokenizer.PeekToken().GetType() == (int)VarType::Integer && src[i].type == VarType::Integer)
+                    {
+                        token = m_tokenizer.NextToken();
+                        var = token.ToInteger<int>();
+                        dst.children.push_back({ name, var });
+                    }
                 }
             }
             else if (src[i].type == VarType::Double)
@@ -290,6 +315,8 @@ LogParser::TokenNames() const
     names[String]  = "string";
     names[Begin]   = "begin";
     names[End]     = "end";
+    names[OBrace]  = "o_brace";
+    names[CBrace]  = "c_brace";
     names[Comment] = "comment";
     names[Eof]     = "end of file";
     return names;
