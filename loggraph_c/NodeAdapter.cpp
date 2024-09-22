@@ -6,6 +6,7 @@
 #include <graph/Node.h>
 #include <graph/Edge.h>
 #include <graph/GraphTools.h>
+#include <graph/NodeRank.h>
 
 namespace loggraph
 {
@@ -64,62 +65,123 @@ NodeAdapter::ToPolytope(const std::shared_ptr<Node>& node)
 std::shared_ptr<graph::Graph> 
 NodeAdapter::ToGraph(const std::shared_ptr<Node>& node)
 {
-	if (node->GetType() != "graph") {
-		return nullptr;
-	}
-
-	auto graph = std::make_shared<graph::Graph>();
-
-	std::map<int, int> id2idx;
-
-	auto& items = node->GetAllData();
-
-	for (auto item : items)
+	if (node->GetType() == "graph")
 	{
-		auto group = reinterpret_cast<const loggraph::VarGroup*>(item.obj);
-		if (group->name == "node")
-		{
-			auto node = std::make_shared<graph::Node>();
+		auto graph = std::make_shared<graph::Graph>();
 
-			for (auto c : group->children)
+		std::map<int, int> id2idx;
+
+		auto& items = node->GetAllData();
+
+		for (auto item : items)
+		{
+			auto group = reinterpret_cast<const loggraph::VarGroup*>(item.obj);
+			if (group->name == "node")
 			{
-				if (c.first == "id")
+				auto node = std::make_shared<graph::Node>();
+
+				for (auto c : group->children)
 				{
-					assert(c.second.type == VarType::Integer);
-					node->SetId(c.second.i);
+					if (c.first == "id")
+					{
+						assert(c.second.type == VarType::Integer);
+						node->SetId(c.second.i);
+					}
+					else if (c.first == "rank")
+					{
+						assert(c.second.type == VarType::Integer);
+						node->AddComponent<graph::NodeRank>(c.second.i);
+					}
 				}
-				else if (c.first == "rank")
+
+				id2idx.insert({ node->GetId(), graph->GetNodes().size() });
+
+				graph->AddNode(node);
+			}
+		}
+
+		for (auto item : items)
+		{
+			auto group = reinterpret_cast<const loggraph::VarGroup*>(item.obj);
+			if (group->name == "edge")
+			{
+				assert(group->children.size() == 2);
+
+				auto f = group->children[0];
+				auto t = group->children[1];
+				assert(f.first == "from" && f.second.type == VarType::Integer);
+				assert(t.first == "to" && t.second.type == VarType::Integer);
+				auto f_itr = id2idx.find(f.second.i);
+				auto t_itr = id2idx.find(t.second.i);
+				assert(f_itr != id2idx.end() && t_itr != id2idx.end());
+				graph->AddEdge(f_itr->second, t_itr->second);
+			}
+		}
+
+		return graph;
+	}
+	else if (node->GetType() == "graph2")
+	{
+		auto graph = std::make_shared<graph::Graph>();
+
+		std::map<int, int> id2idx;
+
+		auto& items = node->GetAllData();
+		for (auto item : items)
+		{
+			auto group = reinterpret_cast<const loggraph::VarGroup*>(item.obj);
+			if (group->name == "node")
+			{
+				std::vector<int> inputs, outputs;
+
+				auto op_node = std::make_shared<graph::Node>();
+				int op_idx = graph->GetNodes().size();
+				graph->AddNode(op_node);
+
+				for (auto c : group->children)
 				{
-					assert(c.second.type == VarType::Integer);
-					node->SetRank(c.second.i);
+					if (c.first == "type")
+					{
+						assert(c.second.type == VarType::String);
+						op_node->SetId(-1);
+					}
+					else if (c.first == "input")
+					{
+						assert(c.second.type == VarType::Integer);
+						inputs.push_back(c.second.i);
+
+
+					}
+					else if (c.first == "output")
+					{
+						assert(c.second.type == VarType::Integer);
+						outputs.push_back(c.second.i);
+					}
+				}
+
+				for (auto id : inputs)
+				{
+					auto itr = id2idx.find(id);
+					assert(itr != id2idx.end());
+					graph->AddEdge(itr->second, op_idx);
+				}
+				for (auto id : outputs)
+				{
+					auto entity_node = std::make_shared<graph::Node>();
+					int entity_idx = graph->GetNodes().size();
+					graph->AddNode(entity_node);
+					graph->AddEdge(op_idx, entity_idx);
+
+					entity_node->SetId(id);
+					id2idx.insert({ id, entity_idx });
 				}
 			}
-
-			id2idx.insert({ node->GetId(), graph->GetNodes().size() });
-
-			graph->AddNode(node);
 		}
+
+		return graph;
 	}
 
-	for (auto item : items)
-	{
-		auto group = reinterpret_cast<const loggraph::VarGroup*>(item.obj);
-		if (group->name == "edge")
-		{
-			assert(group->children.size() == 2);
-
-			auto f = group->children[0];
-			auto t = group->children[1];
-			assert(f.first == "from" && f.second.type == VarType::Integer);
-			assert(t.first == "to" && t.second.type == VarType::Integer);
-			auto f_itr = id2idx.find(f.second.i);
-			auto t_itr = id2idx.find(t.second.i);
-			assert(f_itr != id2idx.end() && t_itr != id2idx.end());
-			graph->AddEdge(f_itr->second, t_itr->second);
-		}
-	}
-
-	return graph;
+	return nullptr;
 }
 
 }
