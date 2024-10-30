@@ -256,7 +256,7 @@ Variant LogParser::ParseMessage(const Message& msg, Token& token)
                 }
                 else
                 {
-                    while (m_tokenizer.PeekToken().GetType() == (int)VarType::Integer && src[i].type == VarType::Integer)
+                    while (m_tokenizer.PeekToken().GetType() == (int)VarType::Integer)
                     {
                         token = m_tokenizer.NextToken();
                         var = token.ToInteger<int>();
@@ -266,11 +266,30 @@ Variant LogParser::ParseMessage(const Message& msg, Token& token)
             }
             else if (src[i].type == VarType::Double)
             {
-                while (m_tokenizer.PeekToken().GetType() == (int)VarType::Double && src[i].type == VarType::Double)
+                if (m_tokenizer.PeekToken().GetType() == LogToken::OBrace)
                 {
+                    // skip {
+                    m_tokenizer.NextToken();
+
+                    while (!Check(LogToken::CBrace, m_tokenizer.PeekToken()))
+                    {
+                        token = m_tokenizer.NextToken();
+                        var = token.ToInteger<double>();
+                        dst.children.push_back({ name, var });
+                    }
+
+                    // skip }
                     token = m_tokenizer.NextToken();
-                    var = token.ToFloat<double>();
-                    dst.children.push_back({ name, var });
+                    Expect(LogToken::CBrace, token);
+                }
+                else
+                {
+                    while (m_tokenizer.PeekToken().GetType() == (int)VarType::Double)
+                    {
+                        token = m_tokenizer.NextToken();
+                        var = token.ToFloat<double>();
+                        dst.children.push_back({ name, var });
+                    }
                 }
             }
         }
