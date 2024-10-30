@@ -159,6 +159,14 @@ void ProtoParser::ParseMessage()
                     Expect(ProtoToken::String, token);
                     type = token.Data();
                 }
+                else if (type == "optional")
+                {
+                    item.optional = true;
+
+                    token = m_tokenizer.NextToken();
+                    Expect(ProtoToken::String, token);
+                    type = token.Data();
+                }
 
                 if (type == "int") {
                     item.type = VarType::Integer;

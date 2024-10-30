@@ -1,5 +1,6 @@
 message node {
 	int id
+	optional string color
 }
 
 message edge {

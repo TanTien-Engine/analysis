@@ -50,6 +50,12 @@ lexer::Tokenizer<LogToken::Type>::Token LogTokenizer::EmitToken()
             case '}':
                 Advance();
                 return Token(LogToken::CBrace, c, c + 1, Offset(c), start_line, start_column);
+            case '[':
+                Advance();
+                return Token(LogToken::OBracket, c, c + 1, Offset(c), start_line, start_column);
+            case ']':
+                Advance();
+                return Token(LogToken::CBracket, c, c + 1, Offset(c), start_line, start_column);
             case '$':
             {
                 LogToken::Type type;
@@ -292,6 +298,31 @@ Variant LogParser::ParseMessage(const Message& msg, Token& token)
                     }
                 }
             }
+        }
+        else if (src[i].optional)
+        {
+            if (!Check(LogToken::OBracket, m_tokenizer.PeekToken()))
+                continue;
+
+            // skip [
+            m_tokenizer.NextToken();
+
+            token = m_tokenizer.NextToken();
+            Expect(LogToken::String, token);
+            std::string name = token.Data();
+
+            token = m_tokenizer.NextToken();
+            Expect(LogToken::String, token);
+            assert(token.Data() == "=");
+
+            token = m_tokenizer.NextToken();
+            Expect(LogToken::String, token);
+            Variant value = token.Data();
+
+            dst.children.push_back({ name, value });
+
+            // skip ]
+            m_tokenizer.NextToken();
         }
         else
         {

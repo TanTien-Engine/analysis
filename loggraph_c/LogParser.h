@@ -21,9 +21,11 @@ namespace LogToken
 	static const Type End           = 1 <<  4; // closing parenthesis: )
 	static const Type OBrace		= 1 <<  5; // opening brace: {
 	static const Type CBrace		= 1 <<  6; // closing brace: }
-	static const Type Comment       = 1 <<  7; // line comment starting with ///
-	static const Type Eof           = 1 <<  8; // end of file
-	static const Type Eol           = 1 <<  9; // end of line
+	static const Type OBracket		= 1 <<	7; // opening bracket: [
+	static const Type CBracket		= 1 <<	8; // closing Bracket: ]
+	static const Type Comment       = 1 <<  9; // line comment starting with ///
+	static const Type Eof           = 1 << 10; // end of file
+	static const Type Eol           = 1 << 11; // end of line
 }
 
 class LogTokenizer : public lexer::Tokenizer<LogToken::Type>

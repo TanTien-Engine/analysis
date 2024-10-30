@@ -7,6 +7,7 @@
 #include <graph/Edge.h>
 #include <graph/GraphTools.h>
 #include <graph/NodeRank.h>
+#include <graph/NodeColor.h>
 
 namespace loggraph
 {
@@ -91,6 +92,17 @@ NodeAdapter::ToGraph(const std::shared_ptr<Node>& log_node)
 					{
 						assert(c.second.type == VarType::Integer);
 						node->AddComponent<graph::NodeRank>(c.second.i);
+					}
+					else if (c.first == "color")
+					{
+						assert(c.second.type == VarType::String);
+						const char* str = reinterpret_cast<const char*>(c.second.p);
+						sm::vec3 color(1, 1, 1);
+						if (strcmp(str, "red") == 0)
+						{
+							color.Set(1, 0, 0);
+						}
+						node->AddComponent<graph::NodeColor>(color);
 					}
 				}
 

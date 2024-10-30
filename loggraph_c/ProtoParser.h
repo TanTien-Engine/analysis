@@ -22,6 +22,7 @@ struct Message
 		std::string name;
 
 		bool repeat = false;
+		bool optional = false;
 	};
 
 	std::string name;
