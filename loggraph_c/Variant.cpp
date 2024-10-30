@@ -1,9 +1,35 @@
 #include "Variant.h"
 
-namespace loggraph
+namespace
 {
 
-std::set<std::string> Variant::strings;
+const char* copy_string(const char* str)
+{
+	size_t len = strlen(str) + 1;
+	char* copy = new char[len];
+	strcpy_s(copy, len, str);
+	return copy;
+}
+
+void clear_var(loggraph::Variant& var)
+{
+	if (var.type == loggraph::VarType::Group)
+	{
+		auto children = reinterpret_cast<const loggraph::VarGroup*>(var.p);
+		delete children;
+	}
+	else if (var.type == loggraph::VarType::String)
+	{
+		auto str = reinterpret_cast<const char*>(var.p);
+		delete[] str;
+	}
+	var.type = loggraph::VarType::Invalid;
+}
+
+}
+
+namespace loggraph
+{
 
 Variant::Variant()
 	: type(VarType::Invalid)
@@ -25,18 +51,12 @@ Variant::Variant(double d)
 Variant::Variant(const std::string& s)
 	: type(VarType::String)
 {
-	auto itr = strings.find(s);
-	if (itr == strings.end()) {
-		auto itr = strings.insert(s);
-		obj = itr.first->data();
-	} else {
-		obj = itr->data();
-	}
+	p = copy_string(s.c_str());
 }
 
 Variant::Variant(const VarGroup& group)
 	: type(VarType::Group)
-	, obj(new VarGroup(group))
+	, p(new VarGroup(group))
 {
 }
 
@@ -47,10 +67,22 @@ Variant::Variant(const Variant& var)
 
 Variant& Variant::operator = (const Variant& var)
 {
-	if (var.type == VarType::Group) {
-		type = var.type;
-		obj = new VarGroup(*static_cast<const VarGroup*>(var.obj));
-	} else {
+	if (&var == this)
+		return *this;
+
+	clear_var(*this);
+
+	type = var.type;
+	if (var.type == VarType::Group) 
+	{
+		p = new VarGroup(*static_cast<const VarGroup*>(var.p));
+	}
+	else if (var.type == VarType::String)
+	{
+		p = copy_string(static_cast<const char*>(var.p));
+	}
+	else 
+	{
 		memcpy(this, &var, sizeof(Variant));
 	}
 	return *this;
@@ -58,11 +90,7 @@ Variant& Variant::operator = (const Variant& var)
 
 Variant::~Variant()
 {
-	if (type == VarType::Group)
-	{
-		auto children = reinterpret_cast<const VarGroup*>(obj);
-		delete children;
-	}
+	clear_var(*this);
 }
 
 }

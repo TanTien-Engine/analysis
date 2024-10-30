@@ -155,10 +155,10 @@ void w_Variant_get_name()
         name = std::to_string(var->d);
         break;
     case loggraph::VarType::String:
-        name = (const char*)var->obj;
+        name = (const char*)var->p;
         break;
     case loggraph::VarType::Group:
-        name = ((const loggraph::VarGroup*)var->obj)->name;
+        name = ((const loggraph::VarGroup*)var->p)->name;
         break;
     default:
         assert(0);
@@ -198,8 +198,8 @@ void w_Variant_get_children()
         return;
     }
 
-    assert(var->obj);
-    auto group = reinterpret_cast<const loggraph::VarGroup*>(var->obj);
+    assert(var->p);
+    auto group = reinterpret_cast<const loggraph::VarGroup*>(var->p);
     auto& children = group->children;
     const int num = (int)(children.size());
     ves_newlist(num);
@@ -249,7 +249,7 @@ void w_Traceback_print()
     {
         assert(data[i].type == loggraph::VarType::String);
         for (int j = 0; j < 3; ++j) {
-            printf("%s ", static_cast<const char*>(data[i].obj));
+            printf("%s ", static_cast<const char*>(data[i].p));
             ++i;
         }
         printf("\n");
@@ -461,7 +461,7 @@ void w_LogGraph_select()
                 continue;
             }
 
-            std::string item = std::string(static_cast<const char*>(var.obj));
+            std::string item = std::string(static_cast<const char*>(var.p));
 
             for (auto& str : needs) {
                 if (item == str) {

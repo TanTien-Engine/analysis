@@ -39,11 +39,8 @@ struct Variant
 	{
 		int64_t i;
 		double  d;
-		const void* obj;
+		const void* p;
 	};
-
-private:
-	static std::set<std::string> strings;
 };
 
 struct VarGroup

@@ -24,7 +24,7 @@ NodeAdapter::ToPolytope(const std::shared_ptr<Node>& node)
 	auto& items = node->GetAllData();
 	for (auto item : items)
 	{
-		auto group = reinterpret_cast<const loggraph::VarGroup*>(item.obj);
+		auto group = reinterpret_cast<const loggraph::VarGroup*>(item.p);
 		if (group->name == "vert")
 		{
 			assert(group->children.size() == 3);
@@ -63,19 +63,19 @@ NodeAdapter::ToPolytope(const std::shared_ptr<Node>& node)
 }
 
 std::shared_ptr<graph::Graph> 
-NodeAdapter::ToGraph(const std::shared_ptr<Node>& node)
+NodeAdapter::ToGraph(const std::shared_ptr<Node>& log_node)
 {
-	if (node->GetType() == "graph")
+	if (log_node->GetType() == "graph")
 	{
 		auto graph = std::make_shared<graph::Graph>();
 
 		std::map<int, int> id2idx;
 
-		auto& items = node->GetAllData();
+		auto& items = log_node->GetAllData();
 
 		for (auto item : items)
 		{
-			auto group = reinterpret_cast<const loggraph::VarGroup*>(item.obj);
+			auto group = reinterpret_cast<const loggraph::VarGroup*>(item.p);
 			if (group->name == "node")
 			{
 				auto node = std::make_shared<graph::Node>();
@@ -85,7 +85,7 @@ NodeAdapter::ToGraph(const std::shared_ptr<Node>& node)
 					if (c.first == "id")
 					{
 						assert(c.second.type == VarType::Integer);
-						node->SetId(c.second.i);
+						node->SetValue(c.second.i);
 					}
 					else if (c.first == "rank")
 					{
@@ -94,7 +94,7 @@ NodeAdapter::ToGraph(const std::shared_ptr<Node>& node)
 					}
 				}
 
-				id2idx.insert({ node->GetId(), graph->GetNodes().size() });
+				id2idx.insert({ node->GetValue(), graph->GetNodes().size() });
 
 				graph->AddNode(node);
 			}
@@ -102,7 +102,7 @@ NodeAdapter::ToGraph(const std::shared_ptr<Node>& node)
 
 		for (auto item : items)
 		{
-			auto group = reinterpret_cast<const loggraph::VarGroup*>(item.obj);
+			auto group = reinterpret_cast<const loggraph::VarGroup*>(item.p);
 			if (group->name == "edge")
 			{
 				assert(group->children.size() == 2);
@@ -120,16 +120,16 @@ NodeAdapter::ToGraph(const std::shared_ptr<Node>& node)
 
 		return graph;
 	}
-	else if (node->GetType() == "graph2")
+	else if (log_node->GetType() == "graph2")
 	{
 		auto graph = std::make_shared<graph::Graph>();
 
 		std::map<int, int> id2idx;
 
-		auto& items = node->GetAllData();
+		auto& items = log_node->GetAllData();
 		for (auto item : items)
 		{
-			auto group = reinterpret_cast<const loggraph::VarGroup*>(item.obj);
+			auto group = reinterpret_cast<const loggraph::VarGroup*>(item.p);
 			if (group->name == "node")
 			{
 				std::vector<int> inputs, outputs;
@@ -143,14 +143,13 @@ NodeAdapter::ToGraph(const std::shared_ptr<Node>& node)
 					if (c.first == "type")
 					{
 						assert(c.second.type == VarType::String);
-						op_node->SetId(-1);
+						const char* str = reinterpret_cast<const char*>(c.second.p);
+						op_node->SetName(str);
 					}
 					else if (c.first == "input")
 					{
 						assert(c.second.type == VarType::Integer);
 						inputs.push_back(c.second.i);
-
-
 					}
 					else if (c.first == "output")
 					{
@@ -172,7 +171,7 @@ NodeAdapter::ToGraph(const std::shared_ptr<Node>& node)
 					graph->AddNode(entity_node);
 					graph->AddEdge(op_idx, entity_idx);
 
-					entity_node->SetId(id);
+					entity_node->SetValue(id);
 					id2idx.insert({ id, entity_idx });
 				}
 			}
