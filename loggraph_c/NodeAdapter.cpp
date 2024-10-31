@@ -106,7 +106,7 @@ NodeAdapter::ToGraph(const std::shared_ptr<Node>& log_node)
 					}
 				}
 
-				id2idx.insert({ node->GetValue(), graph->GetNodes().size() });
+				id2idx.insert({ node->GetValue(), graph->GetNodesNum() });
 
 				graph->AddNode(node);
 			}
@@ -147,7 +147,7 @@ NodeAdapter::ToGraph(const std::shared_ptr<Node>& log_node)
 				std::vector<int> inputs, outputs;
 
 				auto op_node = std::make_shared<graph::Node>();
-				int op_idx = graph->GetNodes().size();
+				int op_idx = graph->GetNodesNum();
 				graph->AddNode(op_node);
 
 				for (auto c : group->children)
@@ -179,7 +179,7 @@ NodeAdapter::ToGraph(const std::shared_ptr<Node>& log_node)
 				for (auto id : outputs)
 				{
 					auto entity_node = std::make_shared<graph::Node>();
-					int entity_idx = graph->GetNodes().size();
+					int entity_idx = graph->GetNodesNum();
 					graph->AddNode(entity_node);
 					graph->AddEdge(op_idx, entity_idx);
 
