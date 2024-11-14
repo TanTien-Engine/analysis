@@ -99,9 +99,17 @@ NodeAdapter::ToGraph(const std::shared_ptr<Node>& log_node)
 						const char* str = reinterpret_cast<const char*>(c.second.p);
 						sm::vec3 color(1, 1, 1);
 						if (strcmp(str, "red") == 0)
-						{
-							color.Set(1, 0, 0);
-						}
+							color.Set(196 / 255.0f, 40 / 255.0f, 27 / 255.0f);
+						else if (strcmp(str, "blue") == 0)
+							color.Set(13 / 255.0f, 105 / 255.0f, 171 / 255.0f);
+						else if (strcmp(str, "yellow") == 0)
+							color.Set(245 / 255.0f, 205 / 255.0f, 47 / 255.0f);
+						else if (strcmp(str, "green") == 0)
+							color.Set(75 / 255.0f, 151 / 255.0f, 74 / 255.0f);
+						else if (strcmp(str, "violet") == 0)
+							color.Set(107 / 255.0f, 50 / 255.0f, 123 / 255.0f);
+						else if (strcmp(str, "orange") == 0)
+							color.Set(218 / 255.0f, 133 / 255.0f, 64 / 255.0f);
 						node->AddComponent<graph::NodeColor>(color);
 					}
 				}
