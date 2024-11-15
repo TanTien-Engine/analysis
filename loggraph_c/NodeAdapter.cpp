@@ -8,6 +8,8 @@
 #include <graph/GraphTools.h>
 #include <graph/NodeRank.h>
 #include <graph/NodeColor.h>
+#include <graph/NodeColor.h>
+#include <graph/EdgeStyle.h>
 
 namespace loggraph
 {
@@ -66,6 +68,26 @@ NodeAdapter::ToPolytope(const std::shared_ptr<Node>& node)
 std::shared_ptr<graph::Graph> 
 NodeAdapter::ToGraph(const std::shared_ptr<Node>& log_node)
 {
+	auto get_color = [](const Variant& var) -> sm::vec3
+	{
+		assert(var.type == VarType::String);
+		const char* str = reinterpret_cast<const char*>(var.p);
+		sm::vec3 color(1, 1, 1);
+		if (strcmp(str, "red") == 0)
+			color.Set(196 / 255.0f, 40 / 255.0f, 27 / 255.0f);
+		else if (strcmp(str, "blue") == 0)
+			color.Set(13 / 255.0f, 105 / 255.0f, 171 / 255.0f);
+		else if (strcmp(str, "yellow") == 0)
+			color.Set(245 / 255.0f, 205 / 255.0f, 47 / 255.0f);
+		else if (strcmp(str, "green") == 0)
+			color.Set(75 / 255.0f, 151 / 255.0f, 74 / 255.0f);
+		else if (strcmp(str, "violet") == 0)
+			color.Set(107 / 255.0f, 50 / 255.0f, 123 / 255.0f);
+		else if (strcmp(str, "orange") == 0)
+			color.Set(218 / 255.0f, 133 / 255.0f, 64 / 255.0f);
+		return color;
+	};
+
 	if (log_node->GetType() == "graph")
 	{
 		auto graph = std::make_shared<graph::Graph>();
@@ -95,21 +117,7 @@ NodeAdapter::ToGraph(const std::shared_ptr<Node>& log_node)
 					}
 					else if (c.first == "color")
 					{
-						assert(c.second.type == VarType::String);
-						const char* str = reinterpret_cast<const char*>(c.second.p);
-						sm::vec3 color(1, 1, 1);
-						if (strcmp(str, "red") == 0)
-							color.Set(196 / 255.0f, 40 / 255.0f, 27 / 255.0f);
-						else if (strcmp(str, "blue") == 0)
-							color.Set(13 / 255.0f, 105 / 255.0f, 171 / 255.0f);
-						else if (strcmp(str, "yellow") == 0)
-							color.Set(245 / 255.0f, 205 / 255.0f, 47 / 255.0f);
-						else if (strcmp(str, "green") == 0)
-							color.Set(75 / 255.0f, 151 / 255.0f, 74 / 255.0f);
-						else if (strcmp(str, "violet") == 0)
-							color.Set(107 / 255.0f, 50 / 255.0f, 123 / 255.0f);
-						else if (strcmp(str, "orange") == 0)
-							color.Set(218 / 255.0f, 133 / 255.0f, 64 / 255.0f);
+						auto color = get_color(c.second);
 						node->AddComponent<graph::NodeColor>(color);
 					}
 				}
@@ -125,7 +133,7 @@ NodeAdapter::ToGraph(const std::shared_ptr<Node>& log_node)
 			auto group = reinterpret_cast<const loggraph::VarGroup*>(item.p);
 			if (group->name == "edge")
 			{
-				assert(group->children.size() == 2);
+				assert(group->children.size() >= 2);
 
 				auto f = group->children[0];
 				auto t = group->children[1];
@@ -134,7 +142,15 @@ NodeAdapter::ToGraph(const std::shared_ptr<Node>& log_node)
 				auto f_itr = id2idx.find(f.second.i);
 				auto t_itr = id2idx.find(t.second.i);
 				assert(f_itr != id2idx.end() && t_itr != id2idx.end());
-				graph->AddEdge(f_itr->second, t_itr->second);
+				auto edge = graph->AddEdge(f_itr->second, t_itr->second);
+
+				// color
+				if (group->children.size() >= 3)
+				{
+					assert(group->children[2].first == "color");
+					auto color = get_color(group->children[2].second);
+					edge->AddComponent<graph::EdgeStyle>(color);
+				}
 			}
 		}
 

@@ -6,4 +6,5 @@ message node {
 message edge {
 	int from
 	int to
+	optional string color
 }
